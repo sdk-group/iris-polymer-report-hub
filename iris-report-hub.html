@@ -1,5 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+
 <dom-module id="iris-report-hub">
   <template>
     <style>
@@ -7,7 +9,19 @@
         display: block;
       }
     </style>
+    <iris-interval-picker></iris-interval-picker>
 
+    <iron-collapse id="departments">
+      <template is="dom-repeat" items="[[availableDepartments]]">
+        <paper-checkbox>[[item.label]]</paper-checkbox>
+      </template>
+    </iron-collapse>
+
+    <iron-collapse id="ticket-templates">
+      <template is="dom-repeat" items="[[ticketTemplates]]">
+        [[item.label]]
+      </template>
+    </iron-collapse>
   </template>
   <script>
     Polymer({
