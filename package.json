@@ -1,0 +1,24 @@
+{
+  "name": "iris-polymer-report-hub",
+  "version": "0.1.0",
+  "description": "report stuff aggregator",
+  "main": "iris-report-hub.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sdk-group/iris-polymer-report-hub.git"
+  },
+  "keywords": [
+    "reports",
+    "administration",
+    "tools"
+  ],
+  "author": "SS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sdk-group/iris-polymer-report-hub/issues"
+  },
+  "homepage": "https://github.com/sdk-group/iris-polymer-report-hub#readme"
+}
