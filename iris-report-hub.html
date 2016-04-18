@@ -5,8 +5,10 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-item/paper-item.html">
 
 <link rel="import" href="iris-stepper.html">
 
@@ -17,7 +19,7 @@
         display: block;
       }
       
-      #stepper {
+      paper-material {
         padding: 20px 10px;
       }
       
@@ -31,7 +33,14 @@
     <paper-material id="pages" elevation="1">
       <iron-pages selected="[[selected]]">
         <div>
-          One
+          <template is="dom-repeat" items="[[templates]]">
+            <paper-item on-tap="selectItem">
+              <div>
+                [[item.label]]
+              </div>
+              <iron-collapse opened="[[isOpened(selectedTemplate,index)]]">[[item.description]]</iron-collapse>
+            </paper-item>
+          </template>
         </div>
         <div>
         </div>
@@ -43,20 +52,39 @@
     </paper-material>
   </template>
   <script>
+    'use strict'
     Polymer({
       is: 'iris-report-hub',
       ready() {
         this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
         this.states = [true, true, false, false];
         this.selected = 0;
+        this.entities = [{
+          label: "Ticket",
+          type: "Ticket",
+          templates: [{
+            label: "Some template",
+            description: "Long and cool template description"
+          }]
+        }];
+        this.templates = [{
+          label: "Some template",
+          description: "Long and cool template description"
+        }];
       },
       doIndex(index) {
         return index + 1;
       },
       stepState(index) {
         return this.states[index];
+      },
+      selectItem(e) {
+        let index = e.model.index;
+        this.selectedTemplate = this.selectedTemplate == index ? -1 : index;
+      },
+      isOpened(selectedTemplate, index) {
+        return selectedTemplate == index;
       }
-
     });
   </script>
 </dom-module>
