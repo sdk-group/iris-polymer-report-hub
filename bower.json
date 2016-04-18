@@ -20,9 +20,10 @@
     "test",
     "tests"
   ],
-  "dependencies": {         
+  "dependencies": {
     "polymer": "Polymer/polymer#^1.1.0",
     "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.3",
-    "paper-elements": "PolymerElements/paper-elements#~1.0.7"
+    "paper-elements": "PolymerElements/paper-elements#~1.0.7",
+    "iron-elements": "polymerelements/iron-elements#^1.0.10"
   }
 }

@@ -30,31 +30,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       @apply(--paper-font-body1);
       line-height: 40px;
     }
-    
-    code {
-      color: var(--google-grey-700);
-    }
-    
-    input[is=iron-input] {
-      width: 100%;
-      box-sizing: border-box;
-    }
-    
-    input,
-    button {
-      font-size: 20px;
-      padding: 0.2em;
-    }
   </style>
 </head>
 
 <body>
 
-  <div class="vertical-section vertical-section-container centered">
-    <template is="dom-bind">
-    </template>
+  <template is="dom-bind">
+    <iris-report-hub> </iris-report-hub>
+  </template>
 
-  </div>
 
   <script>
     var scope = document.querySelector('template[is=dom-bind]');

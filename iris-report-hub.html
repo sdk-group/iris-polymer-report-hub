@@ -2,6 +2,13 @@
 
 <link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../paper-material/paper-material.html">
+
+<link rel="import" href="iris-stepper.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -9,24 +16,46 @@
       :host {
         display: block;
       }
+      
+      #stepper {
+        padding: 20px 10px;
+      }
+      
+      #pages {
+        margin-top: 20px;
+      }
     </style>
-    <iris-interval-picker></iris-interval-picker>
-
-    <iron-collapse id="departments">
-      <template is="dom-repeat" items="[[availableDepartments]]">
-        <paper-checkbox>[[item.label]]</paper-checkbox>
-      </template>
-    </iron-collapse>
-
-    <iron-collapse id="ticket-templates">
-      <template is="dom-repeat" items="[[ticketTemplates]]">
-        [[item.label]]
-      </template>
-    </iron-collapse>
+    <paper-material id="stepper" elevation="1">
+      <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selected}}"></iris-stepper>
+    </paper-material>
+    <paper-material id="pages" elevation="1">
+      <iron-pages selected="[[selected]]">
+        <div>
+          One
+        </div>
+        <div>
+        </div>
+        <div>
+        </div>
+        <div>
+        </div>
+      </iron-pages>
+    </paper-material>
   </template>
   <script>
     Polymer({
-      is: 'iris-report-hub'
+      is: 'iris-report-hub',
+      ready() {
+        this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
+        this.states = [true, true, false, false];
+        this.selected = 0;
+      },
+      doIndex(index) {
+        return index + 1;
+      },
+      stepState(index) {
+        return this.states[index];
+      }
 
     });
   </script>
