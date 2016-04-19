@@ -1,16 +1,22 @@
 <link rel="import" href="../polymer/polymer.html">
 
+<link rel="import" href="../iris-polymer-importer/iris-importer.html">
+
+
 <link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
+<link rel="import" href="../iron-list/iron-list.html">
 <link rel="import" href="../paper-material/paper-material.html">
-<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-tabs/paper-tabs.html">
+<link rel="import" href="../paper-button/paper-button.html">
 
 <link rel="import" href="iris-stepper.html">
+<link rel="import" href="iris-template-picker.html">
+<link rel="import" href="report-hub-temp.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -28,28 +34,30 @@
       }
     </style>
     <paper-material id="stepper" elevation="1">
-      <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selected}}"></iris-stepper>
+      <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
     </paper-material>
-    <paper-material id="pages" elevation="1">
-      <iron-pages selected="[[selected]]">
-        <div>
-          <template is="dom-repeat" items="[[templates]]">
-            <paper-item on-tap="selectItem">
-              <div>
-                [[item.label]]
-              </div>
-              <iron-collapse opened="[[isOpened(selectedTemplate,index)]]">[[item.description]]</iron-collapse>
-            </paper-item>
-          </template>
-        </div>
-        <div>
-        </div>
-        <div>
-        </div>
-        <div>
-        </div>
-      </iron-pages>
-    </paper-material>
+    <iron-pages selected="[[selectedPage]]">
+
+      <div id="template-selector">
+        <iris-template-picker entities="[[entities]]" template="{{selectedTemplate}}"></iris-template-picker>
+      </div>
+
+      <div id="template-office">
+        <paper-checkbox>Выделить все</paper-checkbox>
+        <template is="dom-repeat" items="[[offices]]">
+          <paper-checkbox on-change="selectedOffice">[[item.label]]</paper-checkbox>
+        </template>
+      </div>
+
+      <div id="intreval-picker">
+      </div>
+
+      <div id="table">
+      </div>
+    </iron-pages>
+
+    <paper-button>Назад</paper-button>
+    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length)]]" on-tap="nextPage">Далее</paper-button>
   </template>
   <script>
     'use strict'
@@ -57,33 +65,45 @@
       is: 'iris-report-hub',
       ready() {
         this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
-        this.states = [true, true, false, false];
-        this.selected = 0;
-        this.entities = [{
-          label: "Ticket",
-          type: "Ticket",
-          templates: [{
-            label: "Some template",
-            description: "Long and cool template description"
-          }]
-        }];
-        this.templates = [{
-          label: "Some template",
-          description: "Long and cool template description"
-        }];
+        this.states = Array(this.steps.length);
+        this.selectedPage = 0;
+        this.entities = ReportHubData.entities;
+        this.offices = ReportHubData.offices;
+        this.selectedOffices = []
       },
       doIndex(index) {
         return index + 1;
       },
-      stepState(index) {
-        return this.states[index];
+      nextPage() {
+        this.states[this.selectedPage] = true;
+        this.selectedPage += 1;
       },
-      selectItem(e) {
-        let index = e.model.index;
-        this.selectedTemplate = this.selectedTemplate == index ? -1 : index;
+      selectedOffice(e) {
+        let checked = e.target.checked;
+        let id = e.model.item.id;
+
+        if (checked) {
+          this.push('selectedOffices', id);
+
+        } else {
+          this.set('selectedOffices', _.filter(this.selectedOffices, d => d != id));
+        }
       },
-      isOpened(selectedTemplate, index) {
-        return selectedTemplate == index;
+      canNext(page, template_id, length) {
+        console.log(page, template_id, length);
+        switch (page) {
+          case 0:
+            return !template_id;
+            break;
+          case 1:
+            return !length;
+            break;
+          case 2:
+            return false;
+            break;
+          default:
+            return true;
+        }
       }
     });
   </script>

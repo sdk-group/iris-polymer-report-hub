@@ -1,0 +1,68 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="iris-template-picker">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      
+      .template-description {
+        display: none;
+      }
+      
+      .template-description.enabled {
+        display: block;
+      }
+      
+      .iron-pages {
+        height: 100%;
+      }
+    </style>
+    <paper-tabs selected="{{entityTab}}">
+      <template is="dom-repeat" items="[[entities]]">
+        <paper-tab>[[item.label]]</paper-tab>
+      </template>
+    </paper-tabs>
+    <iron-list items="[[templateByEntity(entityTab,entities)]]" as="item" selection-enabled selected-item="{{selectedItem}}">
+      <template>
+        <div class="list-item">
+          <div class="template-label">
+            [[item.label]]
+          </div>
+          <div class$="template-description [[isOpened(selected,item)]]">[[item.description]]</div>
+        </div>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'iris-template-picker',
+      properties: {
+        entityTab: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+        template: {
+          type: Object,
+          notify: true,
+          computed: '_selected(selectedItem)'
+        }
+      },
+      ready() {},
+      _selected(selectedItem) {
+        if (!selectedItem) return false;
+        return selectedItem.id;
+      },
+      isOpened(selectedTemplate, index) {
+        document.querySelector('iron-list').fire('iron-resize');
+        console.log(this.sel);
+        return selectedTemplate ? 'enabled' : '';
+      },
+      templateByEntity(index) {
+        return this.entities[index].templates;
+      }
+    });
+  </script>
+</dom-module>
