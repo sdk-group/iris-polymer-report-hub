@@ -32,6 +32,15 @@
       #pages {
         margin-top: 20px;
       }
+      
+      .hour-picker {
+        @apply(--layout-horizontal);
+      }
+      
+      .picker-col {
+        @apply(--layout-vertical);
+        width: 40px;
+      }
     </style>
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
@@ -50,6 +59,34 @@
       </div>
 
       <div id="intreval-picker">
+        <div class="hour-picker">
+          <div class="picker-col hours">
+            <template is="dom-repeat" items="[[hoursAM]]">
+              <span class="hour-item">[[item]]</span>
+            </template>
+          </div>
+
+          <div class="picker-col hours">
+            <template is="dom-repeat" items="[[hoursPM]]">
+              <span class="hour-item">[[item]]</span>
+            </template>
+          </div>
+        </div>
+
+        <div class="minute-picker">
+          <div class="picker-col minute-decades">
+            <template is="dom-repeat" items="[[minutesDec]]">
+              <span class="minute-item">[[item]]</span>
+            </template>
+          </div>
+
+          <div class="picker-col minute-numbers">
+            <template is="dom-repeat" items="[[minutesNum]]">
+              <span class="minute-item">[[item]]</span>
+            </template>
+          </div>
+        </div>
+
       </div>
 
       <div id="table">
@@ -69,7 +106,12 @@
         this.selectedPage = 0;
         this.entities = ReportHubData.entities;
         this.offices = ReportHubData.offices;
-        this.selectedOffices = []
+        this.selectedOffices = [];
+
+        this.hoursAM = _.range(0, 12);
+        this.hoursPM = _.range(12, 24);
+        this.minutesDec = _.range(0, 7);
+        this.minutesNum = _.range(0, 10);
       },
       doIndex(index) {
         return index + 1;
