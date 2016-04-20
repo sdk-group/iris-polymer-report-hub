@@ -25,6 +25,9 @@
     "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.3",
     "paper-elements": "PolymerElements/paper-elements#~1.0.7",
     "iron-elements": "polymerelements/iron-elements#^1.0.10",
-    "iris-polymer-importer": "https://github.com/sdk-group/iris-polymer-importer.git"
+    "iris-polymer-importer": "https://github.com/sdk-group/iris-polymer-importer.git",
+    "iris-polymer-styles": "https://github.com/sdk-group/iris-polymer-styles.git",
+    "neon-animation": "PolymerElements/neon-animation#^1.2.0",
+    "iris-polymer-date-picker": "https://github.com/sdk-group/iris-polymer-date-picker.git"
   }
 }

@@ -1,0 +1,181 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+<link rel="import" href="grow-height-animation.html">
+
+<dom-module id="iris-time-picker">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      
+      #picker {
+        @apply(--layout-horizontal);
+      }
+      
+      .time-part {
+        @apply(--layout-horizontal);
+      }
+      
+      .picker-col {
+        @apply(--layout-vertical);
+        width: 60px;
+      }
+      
+      .selected {
+        color: red;
+      }
+      
+      paper-button {
+        width: 50px;
+        min-width: 50px;
+        padding: 4px;
+        margin: 4px;
+      }
+      
+      paper-button[active] {
+        background-color: var(--mydoc-beige-800, cornflowerblue);
+        color: white;
+      }
+      
+      #picker {
+        background-color: white;
+        overflow: hidden;
+        @apply(--shadow-elevation-2dp);
+        padding: 10px;
+      }
+      
+      #clocks {
+        padding: 10px;
+        font-size: 20px;
+        display: inline-block;
+        margin: 5px 0;
+      }
+      
+      .minute-picker {
+        @apply(--layout-vertical);
+        @apply(--layout-justified);
+      }
+      
+      #ddClose {
+        width: 110px;
+        font-size: 12px;
+      }
+    </style>
+    <span id="clocks" on-tap="openDropdown">
+      <span>[[hours]]</span> : <span>[[minutes]]</span>
+    </span>
+    <iron-dropdown id="dd" vertical-align="[[verticalAlign]]" horizontal-align="[[horizontalAlign]]" disabled="[[disabled]]" open-animation-config="[[openAnimationConfig]]" close-animation-config="[[closeAnimationConfig]]">
+      <div class="dropdown-content" id="picker">
+
+        <div class="time-part hour-picker">
+          <div class="picker-col hours">
+            <template is="dom-repeat" items="[[hoursAM]]">
+              <paper-button class$="hour-item" active="[[selectedTime(item, hours)]]" on-tap="selectHours" raised>[[item]]</paper-button>
+            </template>
+          </div>
+
+          <div class="picker-col hours">
+            <template is="dom-repeat" items="[[hoursPM]]">
+              <paper-button class$="hour-item" active="[[selectedTime(item, hours)]]" on-tap="selectHours" raised>[[item]]</paper-button>
+            </template>
+          </div>
+        </div>
+
+        <div class="minute-picker">
+          <div class="time-part">
+            <div class="picker-col minute-decades">
+              <template is="dom-repeat" items="[[minutesDec]]">
+                <paper-button class$="minute-item" active="[[selectedTime(item, minDecs)]]" on-tap="selectMinutesDec" raised>[[item]]</paper-button>
+              </template>
+            </div>
+
+            <div class="picker-col minute-numbers">
+              <template is="dom-repeat" items="[[minutesNum]]">
+                <paper-button class$="minute-item" active="[[selectedTime(item, minNums)]]" on-tap="selectMinutesNums" raised>[[item]]</paper-button>
+              </template>
+            </div>
+          </div>
+
+          <paper-button id="ddClose" on-tap="closeDropdown" raised>закрыть</paper-button>
+        </div>
+      </div>
+    </iron-dropdown>
+  </template>
+  <script>
+    Polymer({
+      is: 'iris-time-picker',
+      properties: {
+        verticalAlign: String,
+        horizontalAlign: String,
+        disabled: Boolean,
+        openAnimationConfig: {
+          type: Array,
+          value: function() {
+            return [{
+              name: 'fade-in-animation',
+              timing: {
+                delay: 150,
+                duration: 50
+              }
+            }, {
+              name: 'expand-block',
+              timing: {
+                delay: 150,
+                duration: 200
+              }
+            }];
+          }
+        },
+        hours: {
+          type: String,
+          value: '00',
+          notify: true
+        },
+        minutes: {
+          type: String,
+          notify: true,
+          computed: '_computeMinutes(minDecs,minNums)'
+        }
+      },
+      ready() {
+        this.hoursAM = _.range(0, 12);
+        this.hoursPM = _.range(12, 24);
+        this.minutesDec = _.range(0, 6);
+        this.minutesNum = _.range(0, 10);
+
+        this.minDecs = 0;
+        this.minNums = 0;
+        this.ddOpen = false;
+      },
+      _computeMinutes(minutesDec, minutesNum) {
+        let minutes = ((minutesDec * 10) + minutesNum).toString();
+        minutes = minutes.length == 1 ? '0' + minutes : minutes
+        return minutes;
+      },
+      selectedTime(item, time) {
+        return item == time;
+      },
+      selectHours(e) {
+        let item = e.model.item;
+        this.hours = item.toString().length == 1 ? '0' + item : item;
+      },
+      selectMinutesDec(e) {
+        let item = e.model.item;
+        this.minDecs = item;
+      },
+      selectMinutesNums(e) {
+        let item = e.model.item;
+        this.minNums = item;
+      },
+      openDropdown() {
+        this.$.dd.open()
+      },
+      closeDropdown() {
+        this.$.dd.close()
+      }
+    });
+  </script>
+</dom-module>

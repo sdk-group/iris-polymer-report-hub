@@ -1,6 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 
 <link rel="import" href="../iris-polymer-importer/iris-importer.html">
+<link rel="import" href="../iris-polymer-date-picker/iris-date-picker.html">
+<link rel="import" href="../iris-polymer-styles/iris-mydocs-styles.html">
 
 
 <link rel="import" href="../iron-collapse/iron-collapse.html">
@@ -17,6 +19,7 @@
 <link rel="import" href="iris-stepper.html">
 <link rel="import" href="iris-template-picker.html">
 <link rel="import" href="report-hub-temp.html">
+<link rel="import" href="iris-time-picker.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -31,15 +34,6 @@
       
       #pages {
         margin-top: 20px;
-      }
-      
-      .hour-picker {
-        @apply(--layout-horizontal);
-      }
-      
-      .picker-col {
-        @apply(--layout-vertical);
-        width: 40px;
       }
     </style>
     <paper-material id="stepper" elevation="1">
@@ -59,34 +53,10 @@
       </div>
 
       <div id="intreval-picker">
-        <div class="hour-picker">
-          <div class="picker-col hours">
-            <template is="dom-repeat" items="[[hoursAM]]">
-              <span class="hour-item">[[item]]</span>
-            </template>
-          </div>
-
-          <div class="picker-col hours">
-            <template is="dom-repeat" items="[[hoursPM]]">
-              <span class="hour-item">[[item]]</span>
-            </template>
-          </div>
-        </div>
-
-        <div class="minute-picker">
-          <div class="picker-col minute-decades">
-            <template is="dom-repeat" items="[[minutesDec]]">
-              <span class="minute-item">[[item]]</span>
-            </template>
-          </div>
-
-          <div class="picker-col minute-numbers">
-            <template is="dom-repeat" items="[[minutesNum]]">
-              <span class="minute-item">[[item]]</span>
-            </template>
-          </div>
-        </div>
-
+        <iris-time-picker vertical-align="top" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
+        <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
+        <iris-date-picker selected="{{startDate}}"></iris-date-picker>
+        <iris-date-picker selected="{{endDate}}"></iris-date-picker>
       </div>
 
       <div id="table">
@@ -94,7 +64,7 @@
     </iron-pages>
 
     <paper-button>Назад</paper-button>
-    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length)]]" on-tap="nextPage">Далее</paper-button>
+    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate)]]" on-tap="nextPage">Далее</paper-button>
   </template>
   <script>
     'use strict'
@@ -106,19 +76,16 @@
         this.selectedPage = 0;
         this.entities = ReportHubData.entities;
         this.offices = ReportHubData.offices;
+        this.startDate = false;
+        this.endDate = false;
         this.selectedOffices = [];
-
-        this.hoursAM = _.range(0, 12);
-        this.hoursPM = _.range(12, 24);
-        this.minutesDec = _.range(0, 7);
-        this.minutesNum = _.range(0, 10);
-      },
-      doIndex(index) {
-        return index + 1;
       },
       nextPage() {
         this.states[this.selectedPage] = true;
         this.selectedPage += 1;
+        if ((this.selectedPage + 1) == this.steps.length) {
+          console.log('request server');
+        }
       },
       selectedOffice(e) {
         let checked = e.target.checked;
@@ -126,12 +93,11 @@
 
         if (checked) {
           this.push('selectedOffices', id);
-
         } else {
           this.set('selectedOffices', _.filter(this.selectedOffices, d => d != id));
         }
       },
-      canNext(page, template_id, length) {
+      canNext(page, template_id, length, startDate, endDate) {
         console.log(page, template_id, length);
         switch (page) {
           case 0:
@@ -141,7 +107,8 @@
             return !length;
             break;
           case 2:
-            return false;
+            console.log(startDate, endDate);
+            return !(startDate && endDate);
             break;
           default:
             return true;
