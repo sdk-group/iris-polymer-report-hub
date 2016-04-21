@@ -9,7 +9,6 @@
     ],
     configure: function(config) {
       let h = config.node.getBoundingClientRect().height;
-      console.log(h);
       this._effect = new KeyframeEffect(config.node, [{
         height: (h / 2) + 'px'
       }, {

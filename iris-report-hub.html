@@ -36,6 +36,8 @@
         margin-top: 20px;
       }
     </style>
+
+    <iris-workstation id="reporter"></iris-workstation>
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
     </paper-material>
@@ -60,6 +62,21 @@
       </div>
 
       <div id="table">
+        <table>
+
+          <template is="dom-repeat" items="[[getRows(tableData)]]" as="rowindex">
+            <tr>
+              <td>
+                [[rowindex]]
+              </td>
+              <template is="dom-repeat" items="[[getColls(rowindex)]]" as="cellindex">
+                <td>
+                  [[getCell(rowindex,cellindex)]]
+                </td>
+              </template>
+            </tr>
+          </template>
+        </table>
       </div>
     </iron-pages>
 
@@ -68,6 +85,33 @@
   </template>
   <script>
     'use strict'
+    let table_draft = {
+      interval: ["2016-04-07", "2016-04-14"],
+      entity: "Ticket",
+      interval_field: "dedicated_date",
+      department: ['department-1', 'department-2'],
+      params: [{
+        label: "Param 1",
+        key: "id",
+        group: [{
+          method: 'month',
+          field: 'booking_date'
+        }, {
+          method: 'month-day',
+          field: 'booking_date'
+        }, {
+          method: '5min',
+          field: 'booking_date'
+        }, {
+          method: 'enum',
+          field: "org_destination"
+        }],
+        aggregator: "count", //String const
+        filter: [],
+        meta: false
+      }]
+    };
+
     Polymer({
       is: 'iris-report-hub',
       ready() {
@@ -85,6 +129,17 @@
         this.selectedPage += 1;
         if ((this.selectedPage + 1) == this.steps.length) {
           console.log('request server');
+          let interval = [this.startDate, this.endDate];
+          table_draft.interval = interval;
+          console.log(interval);
+          this.$.reporter.getTable({
+            table: table_draft
+          }).then((data) => {
+            console.log(data);
+            let keys = _.sortBy(_.union(_.flatMap(data, _.keys)));
+            console.log(keys);
+            this.set('tableData', data);
+          });
         }
       },
       selectedOffice(e) {
@@ -107,12 +162,21 @@
             return !length;
             break;
           case 2:
-            console.log(startDate, endDate);
             return !(startDate && endDate);
             break;
           default:
             return true;
         }
+      },
+      getRows(d) {
+        return _.keys(d);
+      },
+      getColls(ri) {
+
+        return _.keys(this.tableData[ri])
+      },
+      getCell(rowindex, cell) {
+        return _.get(this.tableData, [rowindex, cell]);
       }
     });
   </script>
