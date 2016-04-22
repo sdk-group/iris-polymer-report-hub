@@ -35,6 +35,19 @@
       #pages {
         margin-top: 20px;
       }
+      
+      tr {
+        border-bottom: 1px solid;
+      }
+      
+      td {
+        text-align: center;
+      }
+      
+      table {
+        border-collapse: collapse;
+        white-space: nowrap;
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -63,13 +76,22 @@
 
       <div id="table">
         <table>
-
+          <tr>
+            <th>
+              Парам
+            </th>
+            <template is="dom-repeat" items="[[tableKeys]]" as="cellindex">
+              <th>
+                [[translateKey(cellindex)]]
+              </th>
+            </template>
+          </tr>
           <template is="dom-repeat" items="[[getRows(tableData)]]" as="rowindex">
             <tr>
               <td>
                 [[rowindex]]
               </td>
-              <template is="dom-repeat" items="[[getColls(rowindex)]]" as="cellindex">
+              <template is="dom-repeat" items="[[tableKeys]]" as="cellindex">
                 <td>
                   [[getCell(rowindex,cellindex)]]
                 </td>
@@ -137,7 +159,8 @@
           }).then((data) => {
             console.log(data);
             let keys = _.sortBy(_.union(_.flatMap(data, _.keys)));
-            console.log(keys);
+
+            this.set('tableKeys', keys);
             this.set('tableData', data);
           });
         }
@@ -172,11 +195,13 @@
         return _.keys(d);
       },
       getColls(ri) {
-
         return _.keys(this.tableData[ri])
       },
       getCell(rowindex, cell) {
         return _.get(this.tableData, [rowindex, cell]);
+      },
+      translateKey(key) {
+        return parseInt(key.split('::')[2])
       }
     });
   </script>
