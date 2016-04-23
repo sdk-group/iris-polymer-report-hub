@@ -20,6 +20,7 @@
 <link rel="import" href="iris-template-picker.html">
 <link rel="import" href="report-hub-temp.html">
 <link rel="import" href="iris-time-picker.html">
+<link rel="import" href="report-nested-table.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -34,19 +35,6 @@
       
       #pages {
         margin-top: 20px;
-      }
-      
-      tr {
-        border-bottom: 1px solid;
-      }
-      
-      td {
-        text-align: center;
-      }
-      
-      table {
-        border-collapse: collapse;
-        white-space: nowrap;
       }
     </style>
 
@@ -75,30 +63,7 @@
       </div>
 
       <div id="table">
-        <table>
-          <tr>
-            <th>
-              Парам
-            </th>
-            <template is="dom-repeat" items="[[tableKeys]]" as="cellindex">
-              <th>
-                [[translateKey(cellindex)]]
-              </th>
-            </template>
-          </tr>
-          <template is="dom-repeat" items="[[getRows(tableData)]]" as="rowindex">
-            <tr>
-              <td>
-                [[rowindex]]
-              </td>
-              <template is="dom-repeat" items="[[tableKeys]]" as="cellindex">
-                <td>
-                  [[getCell(rowindex,cellindex)]]
-                </td>
-              </template>
-            </tr>
-          </template>
-        </table>
+        <report-nested-table map="[[tableMap]]" data="[[tableData]]"></report-nested-table>
       </div>
     </iron-pages>
 
@@ -116,17 +81,14 @@
         label: "Param 1",
         key: "id",
         group: [{
+          method: 'enum',
+          field: "org_destination"
+        }, {
           method: 'month',
           field: 'booking_date'
         }, {
           method: 'month-day',
           field: 'booking_date'
-        }, {
-          method: '5min',
-          field: 'booking_date'
-        }, {
-          method: 'enum',
-          field: "org_destination"
         }],
         aggregator: "count", //String const
         filter: [],
@@ -139,7 +101,7 @@
       ready() {
         this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
         this.states = Array(this.steps.length);
-        this.selectedPage = 0;
+        this.selectedPage = 2;
         this.entities = ReportHubData.entities;
         this.offices = ReportHubData.offices;
         this.startDate = false;
@@ -162,6 +124,14 @@
 
             this.set('tableKeys', keys);
             this.set('tableData', data);
+
+            let map = {};
+            _.forEach(keys, key => {
+              let parts = key.split('::');
+              _.setWith(map, parts, true, Object);
+            });
+            this.set('tableMap', map);
+            console.log(map);
           });
         }
       },

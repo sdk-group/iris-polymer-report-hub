@@ -1,0 +1,101 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="report-nested-table">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      
+      td {
+        text-align: center;
+        padding: 0;
+      }
+      
+      th {
+        border-top: 1px solid;
+        border-left: 1px solid;
+      }
+      
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        white-space: nowrap;
+      }
+      
+      .data-cell {
+        border: 1px solid;
+      }
+    </style>
+    <table>
+      <tr>
+        <template is="dom-repeat" items="[[keys]]">
+          <th>
+            [[item]]
+          </th>
+        </template>
+      </tr>
+
+      <template is="dom-if" if="[[hasSubmap(map,keys)]]">
+        <tr>
+          <template is="dom-repeat" items="[[keys]]">
+            <td>
+              <report-nested-table data="[[data]]" map="[[getSubMap(map,item)]]" path="[[computePath(item)]]"></report-nested-table>
+            </td>
+          </template>
+        </tr>
+      </template>
+
+      <template is="dom-if" if="[[!hasSubmap(map,keys)]]">
+        <template is="dom-repeat" items="[[dataRows(data)]]" as="row">
+          <tr>
+            <template is="dom-repeat" items="[[keys]]">
+              <td class="data-cell">
+                [[getData(row,item)]]
+              </td>
+            </template>
+          </tr>
+        </template>
+      </template>
+    </table>
+  </template>
+  <script>
+    Polymer({
+      is: 'report-nested-table',
+      properties: {
+        data: {
+          type: Object
+        },
+        map: {
+          type: Object
+        },
+        keys: {
+          type: Array,
+          computed: '_getKeys(map)'
+        },
+        path: {
+          type: Array,
+          value: []
+        }
+      },
+      computePath(item) {
+        return _.union(this.path, [item]);
+      },
+      _getKeys(map) {
+        return _.sortBy(_.keys(map));
+      },
+      getSubMap(map, item) {
+        return map[item];
+      },
+      hasSubmap(map, keys) {
+        return _.isObject(map[keys[0]])
+      },
+      getData(row, item) {
+        return _.get(this.data, [row, this.path.join('::') + '::' + item]);
+      },
+      dataRows(data) {
+        return _.keys(data)
+      }
+    });
+  </script>
+</dom-module>
