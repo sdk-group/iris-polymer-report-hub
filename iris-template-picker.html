@@ -7,16 +7,37 @@
         display: block;
       }
       
-      .template-description {
+      .list-item .template-description {
         display: none;
       }
       
-      .template-description.enabled {
+      .list-item.enabled .template-description {
         display: block;
       }
       
       .iron-pages {
         height: 100%;
+      }
+      
+      .list-item {
+        max-width: 800px;
+        padding: 10px;
+        border: 2px solid var(--mydoc-brown-800);
+        margin: 0 auto;
+        border-radius: 2px;
+      }
+      
+      .item-wrapper {
+        padding: 10px 0;
+      }
+      
+      .template-label {
+        font-weight: bold;
+        padding-bottom: 5px;
+      }
+      
+      .list-item.enabled {
+        border: 2px solid var(--mydoc-red-1000);
       }
     </style>
     <paper-tabs selected="{{entityTab}}">
@@ -26,11 +47,13 @@
     </paper-tabs>
     <iron-list items="[[templateByEntity(entityTab,entities)]]" as="item" selection-enabled selected-item="{{selectedItem}}">
       <template>
-        <div class="list-item">
-          <div class="template-label">
-            [[item.label]]
+        <div class="item-wrapper">
+          <div class$="list-item [[isOpened(selected,item)]]">
+            <div class="template-label">
+              [[item.label]]
+            </div>
+            <div class="template-description">[[item.description]]</div>
           </div>
-          <div class$="template-description [[isOpened(selected,item)]]">[[item.description]]</div>
         </div>
       </template>
     </iron-list>
@@ -53,7 +76,7 @@
       ready() {},
       _selected(selectedItem) {
         if (!selectedItem) return false;
-        return selectedItem.id;
+        return selectedItem;
       },
       isOpened(selectedTemplate, index) {
         document.querySelector('iron-list').fire('iron-resize');

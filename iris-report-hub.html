@@ -77,19 +77,19 @@
       entity: "Ticket",
       interval_field: "dedicated_date",
       department: ['department-1', 'department-2'],
+      group: [{
+        method: 'enum',
+        field: "org_destination"
+      }, {
+        method: 'month',
+        field: 'booking_date'
+      }, {
+        method: 'week-day',
+        field: 'booking_date'
+      }],
       params: [{
         label: "Param 1",
         key: "id",
-        group: [{
-          method: 'enum',
-          field: "org_destination"
-        }, {
-          method: 'month',
-          field: 'booking_date'
-        }, {
-          method: 'month-day',
-          field: 'booking_date'
-        }],
         aggregator: "count", //String const
         filter: [],
         meta: false
@@ -101,7 +101,7 @@
       ready() {
         this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
         this.states = Array(this.steps.length);
-        this.selectedPage = 2;
+        this.selectedPage = 0;
         this.entities = ReportHubData.entities;
         this.offices = ReportHubData.offices;
         this.startDate = false;
@@ -114,15 +114,17 @@
         if ((this.selectedPage + 1) == this.steps.length) {
           console.log('request server');
           let interval = [this.startDate, this.endDate];
-          table_draft.interval = interval;
-          console.log(interval);
+          let template = this.selectedTemplate.template;
+
+          template.department = this.selectedOffices;
+          template.interval = interval;
+
           this.$.reporter.getTable({
-            table: table_draft
+            table: template
           }).then((data) => {
             console.log(data);
             let keys = _.sortBy(_.union(_.flatMap(data, _.keys)));
 
-            this.set('tableKeys', keys);
             this.set('tableData', data);
 
             let map = {};
@@ -146,7 +148,7 @@
         }
       },
       canNext(page, template_id, length, startDate, endDate) {
-        console.log(page, template_id, length);
+
         switch (page) {
           case 0:
             return !template_id;

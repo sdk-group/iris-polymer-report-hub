@@ -4,17 +4,77 @@
       label: "Талоны",
       type: "Ticket",
       templates: [{
-        id: "ticket-first",
-        label: "Какой-то шаблон для отчета по талонам ",
-        description: "Какое-то описание этого шаблона "
+        id: "ticket-booked",
+        label: "Количество забронированных талонов",
+        description: "Все талоны имевшие состояние «Забронирован»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['isRegistered']
+          }]
+        }
       }, {
-        id: "ticket-second",
-        label: "Еще какой-то шаблон для отчета по талонам ",
-        description: "Какое-то описание этого шаблона "
+        id: "ticket-services",
+        label: "Количество забронированных услуг",
+        description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['isRegistered']
+          }]
+        }
       }, {
-        id: "ticket-third",
-        label: "И еще один шаблон, как будто двух мало ",
-        description: "Какое-то описание этого шаблона "
+        id: "ticket-unregistered",
+        label: "Количество не активированных броней",
+        description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "sum",
+            filter: ['isNotActivated']
+          }]
+        }
+      }, {
+        id: "ticket-registered",
+        label: "Количество выданных талонов",
+        description: "Все талоны имевшие состояние «Зарегистрирован»"
+      }, {
+        id: "ticket-requested-services",
+        label: "Количество запрошенных услуг",
+        description: "Количество услуг, содержащихся в «Выданных талонах»"
+      }, {
+        id: "ticket-called",
+        label: "Количество вызовов талонов",
+        description: "Все талоны имевшие состояние «Вызван»"
+      }, {
+        id: "ticket-removed",
+        label: "Количество удаленных талонов",
+        description: "Все талоны имевшие состояние «Завершен» по событию «Удален»"
+      }, {
+        id: "ticket-processed",
+        label: "Количество обслуженных талонов ",
+        description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»"
+      }, {
+        id: "ticket-processed-services",
+        label: "Количество предоставленных услуг",
+        description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»"
+      }, {
+        id: "ticket-client-not-arrived",
+        label: "Количество неподошедших посетителей",
+        description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»"
+      }, {
+        id: "ticket-client-not-processed",
+        label: "Количество необслуженных посетителей",
+        description: "Все талоны не имевшие состояние «Завершен» на конец дня"
       }]
     }, {
       label: "Сотрудники",

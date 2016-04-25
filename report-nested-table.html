@@ -91,7 +91,8 @@
         return _.isObject(map[keys[0]])
       },
       getData(row, item) {
-        return _.get(this.data, [row, this.path.join('::') + '::' + item]);
+        let key = this.path.length ? this.path.join('::') + '::' + item : item;
+        return _.get(this.data, [row, key]);
       },
       dataRows(data) {
         return _.keys(data)
