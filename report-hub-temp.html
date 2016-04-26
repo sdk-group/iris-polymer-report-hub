@@ -13,7 +13,7 @@
           params: [{
             label: "Param 1",
             aggregator: "count",
-            filter: ['isRegistered']
+            filter: ['hasEventBook']
           }]
         }
       }, {
@@ -27,12 +27,12 @@
             label: "Param 1",
             key: "service_count",
             aggregator: "sum",
-            filter: ['isRegistered']
+            filter: ['hasEventBook']
           }]
         }
       }, {
         id: "ticket-unregistered",
-        label: "Количество не активированных броней",
+        label: "НЕ РАБОТАЕТ!!! Количество не активированных броней",
         description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
         template: {
           entity: "Ticket",
@@ -40,41 +40,102 @@
           params: [{
             label: "Param 1",
             aggregator: "sum",
-            filter: ['isNotActivated']
+            filter: ['state = expired']
           }]
         }
       }, {
         id: "ticket-registered",
         label: "Количество выданных талонов",
-        description: "Все талоны имевшие состояние «Зарегистрирован»"
+        description: "Все талоны имевшие состояние «Зарегистрирован»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['hasEventRegister']
+          }]
+        }
       }, {
         id: "ticket-requested-services",
         label: "Количество запрошенных услуг",
-        description: "Количество услуг, содержащихся в «Выданных талонах»"
+        description: "Количество услуг, содержащихся в «Выданных талонах»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['hasEventRegister']
+          }]
+        }
       }, {
         id: "ticket-called",
         label: "Количество вызовов талонов",
-        description: "Все талоны имевшие состояние «Вызван»"
-      }, {
-        id: "ticket-removed",
-        label: "Количество удаленных талонов",
-        description: "Все талоны имевшие состояние «Завершен» по событию «Удален»"
+        description: "Все талоны имевшие состояние «Вызван»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['hasEventCall']
+          }]
+        }
       }, {
         id: "ticket-processed",
-        label: "Количество обслуженных талонов ",
-        description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»"
+        label: "Количество обслуженных талонов",
+        description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['hasEventClose']
+          }]
+        }
       }, {
         id: "ticket-processed-services",
         label: "Количество предоставленных услуг",
-        description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»"
+        description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['hasEventClose']
+          }]
+        }
       }, {
         id: "ticket-client-not-arrived",
         label: "Количество неподошедших посетителей",
-        description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»"
+        description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['state = expired']
+          }]
+        }
       }, {
         id: "ticket-client-not-processed",
         label: "Количество необслуженных посетителей",
-        description: "Все талоны не имевшие состояние «Завершен» на конец дня"
+        description: "Все талоны не имевшие состояние «Завершен» на конец дня",
+        template: {
+          entity: "Ticket",
+          interval_field: "dedicated_date",
+          params: [{
+            label: "Param 1",
+            aggregator: "count",
+            filter: ['!hasEventClose']
+          }]
+        }
       }]
     }, {
       label: "Сотрудники",
