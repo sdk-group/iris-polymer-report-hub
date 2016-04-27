@@ -1,0 +1,86 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iris-polymer-button-group/iris-button-group.html">
+
+<dom-module id="report-group-maker">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-vertical);
+      }
+
+      .group-variants {
+        padding: 10px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .header {
+        width: 150px;
+      }
+    </style>
+
+    <template is="dom-repeat" items="[[groups]]" as="group">
+      <div class="group-variants">
+        <span class="header">
+          [[group.header]]
+        </span>
+        <iris-button-group selected="{{group.selected}}" buttons="[[group.content]]"></iris-button-group>
+      </div>
+    </template>
+
+
+  </template>
+  <script>
+    Polymer({
+      is: 'report-group-maker',
+      ready() {
+        this.groups = [{
+          header: "Год",
+          selected: 0,
+          content: [{
+            label: 'Нет',
+            code: []
+          }, {
+            label: 'Месяцы'
+          }]
+        }, {
+          header: "Месяц",
+          selected: 0,
+          content: [{
+            label: 'Нет',
+            code: []
+          }, {
+            label: "Дни"
+          }, {
+            label: "Дни недели"
+          }]
+        }, {
+          header: "День",
+          selected: 0,
+          content: [{
+            label: 'Нет',
+            code: []
+          }, {
+            label: "10 минут"
+          }, {
+            label: "30 минут"
+          }, {
+            label: "1 час"
+          }]
+        }, {
+          header: "Дополнительно",
+          selected: 0,
+          content: [{
+            label: 'Нет',
+            code: []
+          }, {
+            label: "офис"
+          }]
+        }];
+
+      }
+    });
+  </script>
+</dom-module>

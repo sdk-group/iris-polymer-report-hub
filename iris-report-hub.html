@@ -21,6 +21,7 @@
 <link rel="import" href="report-hub-temp.html">
 <link rel="import" href="iris-time-picker.html">
 <link rel="import" href="report-nested-table.html">
+<link rel="import" href="report-group-maker.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -28,11 +29,11 @@
       :host {
         display: block;
       }
-      
+
       paper-material {
         padding: 20px 10px;
       }
-      
+
       #pages {
         margin-top: 20px;
       }
@@ -42,10 +43,15 @@
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
     </paper-material>
+
     <iron-pages selected="[[selectedPage]]">
 
       <div id="template-selector">
         <iris-template-picker entities="[[entities]]" template="{{selectedTemplate}}"></iris-template-picker>
+      </div>
+
+      <div id="group-selector">
+        <report-group-maker groups="{{groups}}"></report-group-maker>
       </div>
 
       <div id="template-office">
@@ -63,12 +69,12 @@
       </div>
 
       <div id="table">
-        <report-nested-table map="[[tableMap]]" data="[[tableData]]"></report-nested-table>
+        <report-nested-table map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
       </div>
     </iron-pages>
 
     <paper-button>Назад</paper-button>
-    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate)]]" on-tap="nextPage">Далее</paper-button>
+    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups)]]" on-tap="nextPage">Далее</paper-button>
   </template>
   <script>
     'use strict'
@@ -99,7 +105,7 @@
     Polymer({
       is: 'iris-report-hub',
       ready() {
-        this.steps = ['Шаблон отчета', 'Офис', 'Временной интервал', 'Результат'];
+        this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Результат'];
         this.states = Array(this.steps.length);
         this.selectedPage = 0;
         this.entities = ReportHubData.entities;
@@ -123,10 +129,11 @@
             table: template
           }).then((data) => {
             console.log(data);
-            let keys = _.sortBy(_.union(_.flatMap(data, _.keys)));
+            let keys = _.sortBy(_.keys(data));
 
             this.set('tableData', data);
-
+            this.set('rows', _.keys(template.params));
+            console.log(this.rows);
             let map = {};
             _.forEach(keys, key => {
               let parts = key.split('::');
@@ -147,16 +154,16 @@
           this.set('selectedOffices', _.filter(this.selectedOffices, d => d != id));
         }
       },
-      canNext(page, template_id, length, startDate, endDate) {
+      canNext(page, template_id, length, startDate, endDate, groups) {
 
         switch (page) {
           case 0:
             return !template_id;
             break;
-          case 1:
+          case 2:
             return !length;
             break;
-          case 2:
+          case 3:
             return !(startDate && endDate);
             break;
           default:

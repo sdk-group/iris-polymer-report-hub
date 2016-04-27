@@ -6,23 +6,23 @@
       :host {
         display: block;
       }
-      
+
       td {
         text-align: center;
         padding: 0;
       }
-      
+
       th {
         border-top: 1px solid;
         border-left: 1px solid;
       }
-      
+
       table {
         border-collapse: collapse;
         width: 100%;
         white-space: nowrap;
       }
-      
+
       .data-cell {
         border: 1px solid;
       }
@@ -40,14 +40,14 @@
         <tr>
           <template is="dom-repeat" items="[[keys]]">
             <td>
-              <report-nested-table data="[[data]]" map="[[getSubMap(map,item)]]" path="[[computePath(item)]]"></report-nested-table>
+              <report-nested-table data="[[data]]" rows="[[rows]]" map="[[getSubMap(map,item)]]" path="[[computePath(item)]]"></report-nested-table>
             </td>
           </template>
         </tr>
       </template>
 
       <template is="dom-if" if="[[!hasSubmap(map,keys)]]">
-        <template is="dom-repeat" items="[[dataRows(data)]]" as="row">
+        <template is="dom-repeat" items="[[rows]]" as="row">
           <tr>
             <template is="dom-repeat" items="[[keys]]">
               <td class="data-cell">
@@ -76,6 +76,10 @@
         path: {
           type: Array,
           value: []
+        },
+        rows: {
+          type: Array,
+          value: []
         }
       },
       computePath(item) {
@@ -92,11 +96,10 @@
       },
       getData(row, item) {
         let key = this.path.length ? this.path.join('::') + '::' + item : item;
-        return _.get(this.data, [row, key]);
-      },
-      dataRows(data) {
-        return _.keys(data)
+        console.log(item, row, key);
+        return _.get(this.data, [key, row]);
       }
+
     });
   </script>
 </dom-module>

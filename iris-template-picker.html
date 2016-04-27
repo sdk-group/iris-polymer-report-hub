@@ -6,19 +6,19 @@
       :host {
         display: block;
       }
-      
+
       .list-item .template-description {
         display: none;
       }
-      
+
       .list-item.enabled .template-description {
         display: block;
       }
-      
+
       .iron-pages {
         height: 100%;
       }
-      
+
       .list-item {
         max-width: 800px;
         padding: 10px;
@@ -26,16 +26,16 @@
         margin: 0 auto;
         border-radius: 2px;
       }
-      
+
       .item-wrapper {
         padding: 10px 0;
       }
-      
+
       .template-label {
         font-weight: bold;
         padding-bottom: 5px;
       }
-      
+
       .list-item.enabled {
         border: 2px solid var(--mydoc-red-1000);
       }
@@ -45,7 +45,7 @@
         <paper-tab>[[item.label]]</paper-tab>
       </template>
     </paper-tabs>
-    <iron-list items="[[templateByEntity(entityTab,entities)]]" as="item" selection-enabled selected-item="{{selectedItem}}">
+    <iron-list items="[[templateByEntity(entityTab,entities)]]" as="item" selection-enabled multi-selection selected-items="{{selectedItems}}">
       <template>
         <div class="item-wrapper">
           <div class$="list-item [[isOpened(selected,item)]]">
@@ -62,6 +62,12 @@
     Polymer({
       is: 'iris-template-picker',
       properties: {
+        selectedItems: {
+          type: Object
+        },
+        entities: {
+          type: Object
+        },
         entityTab: {
           type: Number,
           notify: true,
@@ -69,14 +75,23 @@
         },
         template: {
           type: Object,
-          notify: true,
-          computed: '_selected(selectedItem)'
+          notify: true
         }
       },
-      ready() {},
-      _selected(selectedItem) {
-        if (!selectedItem) return false;
-        return selectedItem;
+      observers: ['_computeTemplate(entities,selectedItems.length)'],
+      _computeTemplate() {
+        let params = [];
+        _.forEach(this.selectedItems, item => {
+          params.push(_.clone(item))
+        });
+        let desc = this.entities[this.entityTab];
+        let template = {
+          entity: desc.entity,
+          interval_field: desc.interval_field,
+          params: params
+        };
+
+        this.set('template', template);
       },
       isOpened(selectedTemplate, index) {
         document.querySelector('iron-list').fire('iron-resize');
