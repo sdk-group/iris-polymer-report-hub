@@ -78,6 +78,8 @@
   </template>
   <script>
     'use strict'
+    const group_delimiter = '::';
+
     let table_draft = {
       interval: ["2016-04-07", "2016-04-14"],
       entity: "Ticket",
@@ -120,25 +122,35 @@
         if ((this.selectedPage + 1) == this.steps.length) {
           console.log('request server');
           let interval = [this.startDate, this.endDate];
-          let template = this.selectedTemplate.template;
+          let template = this.selectedTemplate;
 
           template.department = this.selectedOffices;
           template.interval = interval;
+          template.group = this.groups;
+
+          let header_labels = _.map(template.group, 'method').join(group_delimiter);
+          let labels = _.map(template.params, 'label');
 
           this.$.reporter.getTable({
             table: template
           }).then((data) => {
-            console.log(data);
             let keys = _.sortBy(_.keys(data));
+            _.set(data, header_labels, labels);
 
-            this.set('tableData', data);
-            this.set('rows', _.keys(template.params));
-            console.log(this.rows);
             let map = {};
+            _.set(map, _.map(template.group, 'method'), true, Object);
+
             _.forEach(keys, key => {
-              let parts = key.split('::');
+              let parts = key.split(group_delimiter);
               _.setWith(map, parts, true, Object);
             });
+
+            let rows = {
+              keys: _.keys(template.params)
+            };
+
+            this.set('tableData', data);
+            this.set('rows', rows);
             this.set('tableMap', map);
             console.log(map);
           });
@@ -167,7 +179,7 @@
             return !(startDate && endDate);
             break;
           default:
-            return true;
+            return false;
         }
       },
       getRows(d) {

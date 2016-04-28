@@ -47,7 +47,7 @@
       </template>
 
       <template is="dom-if" if="[[!hasSubmap(map,keys)]]">
-        <template is="dom-repeat" items="[[rows]]" as="row">
+        <template is="dom-repeat" items="[[rows.keys]]" as="row">
           <tr>
             <template is="dom-repeat" items="[[keys]]">
               <td class="data-cell">
@@ -78,15 +78,15 @@
           value: []
         },
         rows: {
-          type: Array,
-          value: []
+          type: Object,
+          value: {}
         }
       },
       computePath(item) {
         return _.union(this.path, [item]);
       },
       _getKeys(map) {
-        return _.sortBy(_.keys(map));
+        return _.keys(map);
       },
       getSubMap(map, item) {
         return map[item];
@@ -96,10 +96,9 @@
       },
       getData(row, item) {
         let key = this.path.length ? this.path.join('::') + '::' + item : item;
-        console.log(item, row, key);
-        return _.get(this.data, [key, row]);
+        let data = _.get(this.data, [key, row]);
+        return data === undefined ? '-' : data;
       }
-
     });
   </script>
 </dom-module>

@@ -21,12 +21,12 @@
       }
     </style>
 
-    <template is="dom-repeat" items="[[groups]]" as="group">
+    <template is="dom-repeat" items="[[variants]]" as="group">
       <div class="group-variants">
         <span class="header">
           [[group.header]]
         </span>
-        <iris-button-group selected="{{group.selected}}" buttons="[[group.content]]"></iris-button-group>
+        <iris-button-group selected="{{group.selected}}" buttons="[[group.content]]" on-tap="selectGroup"></iris-button-group>
       </div>
     </template>
 
@@ -35,48 +35,87 @@
   <script>
     Polymer({
       is: 'report-group-maker',
+      properties: {
+        groups: {
+          type: Array,
+          notify: true,
+          value: []
+        }
+      },
+      selectGroup() {
+        let result = _.reduce(this.variants, (a, g) => (g.selected !== 'no') ? a.push(g.selected) && a : a, []);
+        this.set('groups', result);
+      },
       ready() {
-        this.groups = [{
+        this.variants = [{
           header: "Год",
-          selected: 0,
+          selected: 'no',
           content: [{
             label: 'Нет',
-            code: []
+            code: 'no'
           }, {
-            label: 'Месяцы'
+            label: 'Месяцы',
+            code: {
+              method: 'month',
+              field: 'booking_date'
+            }
           }]
         }, {
           header: "Месяц",
-          selected: 0,
+          selected: 'no',
           content: [{
             label: 'Нет',
-            code: []
+            code: 'no'
           }, {
-            label: "Дни"
+            label: "Дни",
+            code: {
+              method: 'month-day',
+              field: 'booking_date'
+            }
           }, {
-            label: "Дни недели"
+            label: "Дни недели",
+            code: {
+              method: 'week-day',
+              field: 'booking_date'
+            }
           }]
         }, {
           header: "День",
-          selected: 0,
+          selected: 'no',
           content: [{
             label: 'Нет',
-            code: []
+            code: 'no'
           }, {
-            label: "10 минут"
+            label: "10 минут",
+            code: {
+              method: '10minute',
+              field: 'booking_date'
+            }
           }, {
-            label: "30 минут"
+            label: "30 минут",
+            code: {
+              method: '30minute',
+              field: 'booking_date'
+            }
           }, {
-            label: "1 час"
+            label: "1 час",
+            code: {
+              method: '60minute',
+              field: 'booking_date'
+            }
           }]
         }, {
           header: "Дополнительно",
-          selected: 0,
+          selected: 'no',
           content: [{
             label: 'Нет',
-            code: []
+            code: 'no'
           }, {
-            label: "офис"
+            label: "офис",
+            code: {
+              method: 'enum',
+              field: 'org_destination'
+            }
           }]
         }];
 
