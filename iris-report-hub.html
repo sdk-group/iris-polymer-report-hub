@@ -4,7 +4,6 @@
 <link rel="import" href="../iris-polymer-date-picker/iris-date-picker.html">
 <link rel="import" href="../iris-polymer-styles/iris-mydocs-styles.html">
 
-
 <link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
@@ -27,16 +26,64 @@
   <template>
     <style>
       :host {
-        display: block;
+        @apply(--layout-vertical);
+      }
+
+      iron-pages {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-auto);
+        height: 0;
+        overflow: auto;
       }
 
       paper-material {
         padding: 20px 10px;
       }
 
+      iron-pages paper-material {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-auto);
+      }
+
+      iron-pages > div {
+        padding: 1px 3px;
+        height: 100%;
+        @apply(--layout-vertical);
+        @apply(--layout-flex-auto);
+      }
+
+      iris-template-picker {
+        @apply(--layout-flex-auto);
+      }
+
       #pages {
         margin-top: 20px;
       }
+
+      #stepper {
+        margin: 0 3px;
+        box-shadow: 0 -1px 2px 0 rgba(0, 0, 0, 0.14), 0 -1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      #interval-picker {
+        @apply(--layout-horizontal);
+        @apply(--layout-around-justified);
+      }
+
+      paper-checkbox {
+        display: block;
+      }
+
+      #template-selector paper-material {
+        padding: 0;
+      }
+
+      #action-buttons {
+        margin: 0 3px;
+        @apply(--layout);
+        @apply(--layout-end-justified);
+      }
+
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -47,61 +94,81 @@
     <iron-pages selected="[[selectedPage]]">
 
       <div id="template-selector">
-        <iris-template-picker entities="[[entities]]" template="{{selectedTemplate}}"></iris-template-picker>
+        <paper-material elevation="1">
+          <iris-template-picker entities="[[entities]]" template="{{selectedTemplate}}"></iris-template-picker>
+        </paper-material>
       </div>
 
       <div id="group-selector">
-        <report-group-maker groups="{{groups}}"></report-group-maker>
+        <paper-material elevation="1">
+          <report-group-maker groups="{{groups}}"></report-group-maker>
+        </paper-material>
       </div>
 
       <div id="template-office">
-        <paper-checkbox>Выделить все</paper-checkbox>
-        <template is="dom-repeat" items="[[offices]]">
-          <paper-checkbox on-change="selectedOffice">[[item.label]]</paper-checkbox>
-        </template>
+        <paper-material elevation="1">
+          <paper-checkbox on-change="checkAll" checked="{{allChecked}}">Выделить все</paper-checkbox>
+          <template is="dom-repeat" items="[[offices]]">
+            <paper-checkbox on-change="selectedOffice">[[item.label]]</paper-checkbox>
+          </template>
+        </paper-material>
       </div>
 
-      <div id="intreval-picker">
-        <iris-time-picker vertical-align="top" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
-        <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
-        <iris-date-picker selected="{{startDate}}"></iris-date-picker>
-        <iris-date-picker selected="{{endDate}}"></iris-date-picker>
+      <div id="interval-picker">
+        <paper-material id="start-time" elevation="1">
+          <iris-time-picker vertical-align="top" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
+          <iris-date-picker multiselect selections="{{startDate}}"></iris-date-picker>
+        </paper-material>
+
+        <paper-material id="end-time" elevation="1">
+          <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
+          <iris-date-picker selected="{{endDate}}"></iris-date-picker>
+        </paper-material>
       </div>
 
       <div id="table">
         <report-nested-table map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
       </div>
     </iron-pages>
-
-    <paper-button>Назад</paper-button>
-    <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups)]]" on-tap="nextPage">Далее</paper-button>
+    <paper-material id="action-buttons" elevation="1">
+      <paper-button>Назад</paper-button>
+      <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups)]]" on-tap="nextPage">Далее</paper-button>
+    </paper-material>
   </template>
   <script>
     'use strict'
     const group_delimiter = '::';
 
     let table_draft = {
-      interval: ["2016-04-07", "2016-04-14"],
+      interval: [
+        "2016-04-07", "2016-04-14"
+      ],
       entity: "Ticket",
       interval_field: "dedicated_date",
-      department: ['department-1', 'department-2'],
-      group: [{
-        method: 'enum',
-        field: "org_destination"
-      }, {
-        method: 'month',
-        field: 'booking_date'
-      }, {
-        method: 'week-day',
-        field: 'booking_date'
-      }],
-      params: [{
-        label: "Param 1",
-        key: "id",
-        aggregator: "count", //String const
-        filter: [],
-        meta: false
-      }]
+      department: [
+        'department-1', 'department-2'
+      ],
+      group: [
+        {
+          method: 'enum',
+          field: "org_destination"
+        }, {
+          method: 'month',
+          field: 'booking_date'
+        }, {
+          method: 'week-day',
+          field: 'booking_date'
+        }
+      ],
+      params: [
+        {
+          label: "Param 1",
+          key: "id",
+          aggregator: "count", //String const
+          filter: [],
+          meta: false
+        }
+      ]
     };
 
     Polymer({
@@ -115,6 +182,9 @@
         this.startDate = false;
         this.endDate = false;
         this.selectedOffices = [];
+      },
+      checkAll() {
+        console.log('All');
       },
       nextPage() {
         this.states[this.selectedPage] = true;
@@ -131,9 +201,7 @@
           let header_labels = _.map(template.group, 'method').join(group_delimiter);
           let labels = _.map(template.params, 'label');
 
-          this.$.reporter.getTable({
-            table: template
-          }).then((data) => {
+          this.$.reporter.getTable({table: template}).then((data) => {
             let keys = _.sortBy(_.keys(data));
             _.set(data, header_labels, labels);
 
@@ -152,7 +220,6 @@
             this.set('tableData', data);
             this.set('rows', rows);
             this.set('tableMap', map);
-            console.log(map);
           });
         }
       },
@@ -167,7 +234,7 @@
         }
       },
       canNext(page, template_id, length, startDate, endDate, groups) {
-
+        console.log(startDate, endDate);
         switch (page) {
           case 0:
             return !template_id;
@@ -196,4 +263,6 @@
       }
     });
   </script>
+</dom-module>
+pt>
 </dom-module>

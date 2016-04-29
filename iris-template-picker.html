@@ -1,10 +1,25 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-card/paper-card.html">
 
 <dom-module id="iris-template-picker">
   <template>
     <style>
       :host {
-        display: block;
+        @apply(--layout-vertical);
+        --paper-tabs: {
+          background-color: var(--mydoc-brown-800);
+          font-size: 18px;
+        };
+        --paper-tabs-selection-bar: {
+          height: 4px;
+        };
+        --paper-tabs-selection-bar-color: var(--mydoc-beige-600);
+      }
+
+      iron-list {
+        height: 0;
+        @apply(--layout-flex-auto);
+        background: #F6F6F6;
       }
 
       .list-item .template-description {
@@ -21,14 +36,18 @@
 
       .list-item {
         max-width: 800px;
+        display: block;
         padding: 10px;
-        border: 2px solid var(--mydoc-brown-800);
         margin: 0 auto;
         border-radius: 2px;
       }
 
       .item-wrapper {
         padding: 10px 0;
+      }
+
+      paper-card {
+        border-width: 0;
       }
 
       .template-label {
@@ -39,6 +58,7 @@
       .list-item.enabled {
         border: 2px solid var(--mydoc-red-1000);
       }
+
     </style>
     <paper-tabs selected="{{entityTab}}">
       <template is="dom-repeat" items="[[entities]]">
@@ -48,12 +68,9 @@
     <iron-list items="[[templateByEntity(entityTab,entities)]]" as="item" selection-enabled multi-selection selected-items="{{selectedItems}}">
       <template>
         <div class="item-wrapper">
-          <div class$="list-item [[isOpened(selected,item)]]">
-            <div class="template-label">
-              [[item.label]]
-            </div>
+          <paper-card class$="list-item [[isOpened(selected,item)]]" heading="[[item.label]]">
             <div class="template-description">[[item.description]]</div>
-          </div>
+          </paper-card>
         </div>
       </template>
     </iron-list>
@@ -95,7 +112,9 @@
       },
       isOpened(selectedTemplate, index) {
         document.querySelector('iron-list').fire('iron-resize');
-        return selectedTemplate ? 'enabled' : '';
+        return selectedTemplate
+          ? 'enabled'
+          : '';
       },
       templateByEntity(index) {
         return this.entities[index].templates;
