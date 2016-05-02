@@ -3,6 +3,7 @@
 <link rel="import" href="../iris-polymer-importer/iris-importer.html">
 <link rel="import" href="../iris-polymer-date-picker/iris-date-picker.html">
 <link rel="import" href="../iris-polymer-styles/iris-mydocs-styles.html">
+<link rel="import" href="../iris-polymer-table/iris-table.html">
 
 <link rel="import" href="../iron-collapse/iron-collapse.html">
 <link rel="import" href="../paper-checkbox/paper-checkbox.html">
@@ -83,7 +84,6 @@
         @apply(--layout);
         @apply(--layout-end-justified);
       }
-
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -107,6 +107,7 @@
 
       <div id="template-office">
         <paper-material elevation="1">
+          <iris-table data="[[offices]]"></iris-table>
           <paper-checkbox on-change="checkAll" checked="{{allChecked}}">Выделить все</paper-checkbox>
           <template is="dom-repeat" items="[[offices]]">
             <paper-checkbox on-change="selectedOffice">[[item.label]]</paper-checkbox>
@@ -148,27 +149,23 @@
       department: [
         'department-1', 'department-2'
       ],
-      group: [
-        {
-          method: 'enum',
-          field: "org_destination"
-        }, {
-          method: 'month',
-          field: 'booking_date'
-        }, {
-          method: 'week-day',
-          field: 'booking_date'
-        }
-      ],
-      params: [
-        {
-          label: "Param 1",
-          key: "id",
-          aggregator: "count", //String const
-          filter: [],
-          meta: false
-        }
-      ]
+      group: [{
+        method: 'enum',
+        field: "org_destination"
+      }, {
+        method: 'month',
+        field: 'booking_date'
+      }, {
+        method: 'week-day',
+        field: 'booking_date'
+      }],
+      params: [{
+        label: "Param 1",
+        key: "id",
+        aggregator: "count", //String const
+        filter: [],
+        meta: false
+      }]
     };
 
     Polymer({
@@ -201,7 +198,9 @@
           let header_labels = _.map(template.group, 'method').join(group_delimiter);
           let labels = _.map(template.params, 'label');
 
-          this.$.reporter.getTable({table: template}).then((data) => {
+          this.$.reporter.getTable({
+            table: template
+          }).then((data) => {
             let keys = _.sortBy(_.keys(data));
             _.set(data, header_labels, labels);
 
