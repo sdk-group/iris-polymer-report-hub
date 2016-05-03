@@ -107,11 +107,7 @@
 
       <div id="template-office">
         <paper-material elevation="1">
-          <iris-table data="[[offices]]"></iris-table>
-          <paper-checkbox on-change="checkAll" checked="{{allChecked}}">Выделить все</paper-checkbox>
-          <template is="dom-repeat" items="[[offices]]">
-            <paper-checkbox on-change="selectedOffice">[[item.label]]</paper-checkbox>
-          </template>
+          <iris-table data="[[offices]]" multiselect fields-model="[[tableModel]]" selected="{{selectedOffices}}"></iris-table>
         </paper-material>
       </div>
 
@@ -179,6 +175,10 @@
         this.startDate = false;
         this.endDate = false;
         this.selectedOffices = [];
+        this.tableModel = [{
+          field: 'label',
+          label: "Офис"
+        }];
       },
       checkAll() {
         console.log('All');
@@ -191,7 +191,7 @@
           let interval = [this.startDate, this.endDate];
           let template = this.selectedTemplate;
 
-          template.department = this.selectedOffices;
+          template.department = _.map(this.selectedOffices, 'id');
           template.interval = interval;
           template.group = this.groups;
 
@@ -220,16 +220,6 @@
             this.set('rows', rows);
             this.set('tableMap', map);
           });
-        }
-      },
-      selectedOffice(e) {
-        let checked = e.target.checked;
-        let id = e.model.item.id;
-
-        if (checked) {
-          this.push('selectedOffices', id);
-        } else {
-          this.set('selectedOffices', _.filter(this.selectedOffices, d => d != id));
         }
       },
       canNext(page, template_id, length, startDate, endDate, groups) {
