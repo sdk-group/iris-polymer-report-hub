@@ -10,55 +10,55 @@
       :host {
         display: block;
       }
-      
+
       #picker {
         @apply(--layout-horizontal);
       }
-      
+
       .time-part {
         @apply(--layout-horizontal);
       }
-      
+
       .picker-col {
         @apply(--layout-vertical);
         width: 60px;
       }
-      
+
       .selected {
         color: red;
       }
-      
+
       paper-button {
         width: 50px;
         min-width: 50px;
         padding: 4px;
         margin: 4px;
       }
-      
+
       paper-button[active] {
         background-color: var(--mydoc-beige-800, cornflowerblue);
         color: white;
       }
-      
+
       #picker {
         background-color: white;
         overflow: hidden;
         @apply(--shadow-elevation-2dp);
         padding: 10px;
       }
-      
+
       #clocks {
         padding: 10px;
         font-size: 20px;
         display: inline-block;
         margin: 5px 0;
       }
-      
+
       .minute-picker {
         @apply(--layout-vertical);
         @apply(--layout-justified);
       }
-      
+
       #ddClose {
         width: 110px;
         font-size: 12px;
@@ -137,8 +137,12 @@
         minutes: {
           type: String,
           notify: true,
+          observer: '_minutesChanged',
           computed: '_computeMinutes(minDecs,minNums)'
         }
+      },
+      _minutesChanged(v) {
+        console.log(v);
       },
       ready() {
         this.hoursAM = _.range(0, 12);

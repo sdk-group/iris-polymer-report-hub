@@ -67,6 +67,11 @@
       }
 
       #interval-picker {
+        @apply(--layout-vertical);
+        @apply(--layout-around-justified);
+      }
+
+      #calendar-wrapper {
         @apply(--layout-horizontal);
         @apply(--layout-around-justified);
       }
@@ -83,6 +88,14 @@
         margin: 0 3px;
         @apply(--layout);
         @apply(--layout-end-justified);
+      }
+
+      paper-card {
+        border-width: 0;
+      }
+
+      iris-time-picker {
+        text-align: center;
       }
     </style>
 
@@ -112,15 +125,17 @@
       </div>
 
       <div id="interval-picker">
-        <paper-material id="start-time" elevation="1">
-          <iris-time-picker vertical-align="top" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
-          <iris-date-picker multiselect selections="{{startDate}}"></iris-date-picker>
-        </paper-material>
+        <div id="calendar-wrapper">
+          <paper-card id="start-time" heading="От">
+            <iris-time-picker vertical-align="top" horizontal-align="right" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
+            <iris-date-picker selected="{{startDate}}"></iris-date-picker>
+          </paper-card>
 
-        <paper-material id="end-time" elevation="1">
-          <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
-          <iris-date-picker selected="{{endDate}}"></iris-date-picker>
-        </paper-material>
+          <paper-card id="end-time" heading="До">
+            <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
+            <iris-date-picker selected="{{endDate}}"></iris-date-picker>
+          </paper-card>
+        </div>
       </div>
 
       <div id="table">
@@ -170,6 +185,10 @@
         this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Результат'];
         this.states = Array(this.steps.length);
         this.selectedPage = 0;
+
+        this.endHours = '23';
+        this.endMinutes = '59';
+
         this.entities = ReportHubData.entities;
         this.offices = ReportHubData.offices;
         this.startDate = false;
