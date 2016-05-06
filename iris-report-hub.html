@@ -127,12 +127,12 @@
       <div id="interval-picker">
         <div id="calendar-wrapper">
           <paper-card id="start-time" heading="От">
-            <iris-time-picker vertical-align="top" horizontal-align="right" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>
+            <!--<iris-time-picker vertical-align="top" horizontal-align="right" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>-->
             <iris-date-picker selected="{{startDate}}"></iris-date-picker>
           </paper-card>
 
           <paper-card id="end-time" heading="До">
-            <iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>
+            <!--<iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>-->
             <iris-date-picker selected="{{endDate}}"></iris-date-picker>
           </paper-card>
         </div>
@@ -220,6 +220,7 @@
           this.$.reporter.getTable({
             table: template
           }).then((data) => {
+            console.log('response', data);
             let keys = _.sortBy(_.keys(data));
             _.set(data, header_labels, labels);
 
@@ -251,7 +252,7 @@
             return !length;
             break;
           case 3:
-            return !(startDate && endDate);
+            return !(startDate && endDate && endDate >= startDate);
             break;
           default:
             return false;
