@@ -97,6 +97,18 @@
       iris-time-picker {
         text-align: center;
       }
+
+      #interval-deco {
+        @apply(--layout-horizontal);
+        @apply(--layout-between-justified);
+        @apply(--layout-center);
+      }
+
+      #interval-deco iron-icon {
+        width: 72px;
+        height: 72px;
+        color: var(--mydoc-beige-800, cornflowerblue);
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -130,7 +142,11 @@
             <!--<iris-time-picker vertical-align="top" horizontal-align="right" hours="{{startHours}}" minutes="{{startMinutes}}"></iris-time-picker>-->
             <iris-date-picker selected="{{startDate}}"></iris-date-picker>
           </paper-card>
-
+          <div id="interval-deco">
+            <iron-icon icon="chevron-left"></iron-icon>
+            <iron-icon icon="more-horiz"></iron-icon>
+            <iron-icon icon="chevron-right"></iron-icon>
+          </div>
           <paper-card id="end-time" heading="До">
             <!--<iris-time-picker vertical-align="top" hours="{{endHours}}" minutes="{{endMinutes}}"></iris-time-picker>-->
             <iris-date-picker selected="{{endDate}}"></iris-date-picker>

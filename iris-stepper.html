@@ -8,20 +8,20 @@
         @apply(--layout-horizontal);
         height: 30px;
       }
-      
+
       :host div:last-of-type {
         @apply(--layout-flex-none);
       }
-      
+
       .step {
         @apply(--layout-flex-auto);
         @apply(--layout-center);
       }
-      
+
       .step-label {
         font-size: 16px;
       }
-      
+
       .icon {
         border-radius: 50%;
         background: cornflowerblue;
@@ -30,19 +30,19 @@
         width: 30px;
         height: 30px;
       }
-      
+
       .step::after {
         content: '';
         @apply(--layout-flex-auto);
         border-bottom: 1px solid;
         margin: 0 8px;
       }
-      
+
       .step .icon {
         display: none;
         visibility: hidden;
       }
-      
+
       .disabled .step-index {
         background-color: grey;
         display: inline;
@@ -55,17 +55,17 @@
         user-select: none;
         cursor: default;
       }
-      
+
       .edit .step-edit {
         display: inline;
         visibility: visible;
       }
-      
+
       .complete .step-complete {
         display: inline;
         visibility: visible;
       }
-      
+
       .edit .step-label {
         font-weight: 800;
       }
@@ -82,7 +82,7 @@
   </template>
   <script>
     Polymer({
-      is: '',
+      is: 'iris-stepper',
       properties: {
         selected: {
           type: Number,
