@@ -155,7 +155,7 @@
       </div>
 
       <div id="table">
-        <report-nested-table map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+        <report-nested-table entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
       </div>
     </iron-pages>
     <paper-material id="action-buttons" elevation="1">
@@ -221,8 +221,10 @@
       nextPage() {
         this.states[this.selectedPage] = true;
         this.selectedPage += 1;
+
         if ((this.selectedPage + 1) == this.steps.length) {
           console.log('request server');
+
           let interval = [this.startDate, this.endDate];
           let template = this.selectedTemplate;
 

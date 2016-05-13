@@ -1,0 +1,43 @@
+<script>
+  (function() {
+    'use strict'
+    let registry = {
+      Ticket: {
+        captions: {
+          'month': "месяц",
+          'week-day': "день недели",
+          'month-day': "день",
+          '60minute': 'час',
+          '30minute': '30 минут',
+          '10minute': '10 минут'
+        },
+        labels: {
+          'month': "месяц",
+          'week-day': "день недели",
+          'month-day': "день",
+          'dont-know': 'Пуам!'
+        }
+      }
+    };
+    window.IrisBehaviors = window.IrisBehaviors || {};
+
+    IrisBehaviors.TranslationBehvior = {
+      translate(entity, value) {
+        let is_caption = !~value.indexOf('--');
+        console.log('is_caption', is_caption);
+        return is_caption ? this.translateCaption(entity, value) : this.translateLabel(entity, value);
+      },
+      translateLabel(entity, value) {
+        let parts = value.split('--');
+        let val = parts[0];
+        let type = parts[1];
+        return val;
+      },
+      translateCaption(entity, value) {
+        let caption = _.get(registry, [entity, 'captions', value]) || _.get(registry, [entity, 'captions', value])
+        return caption;
+      }
+    };
+
+  })();
+</script>
