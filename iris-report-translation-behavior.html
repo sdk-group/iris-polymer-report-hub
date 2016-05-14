@@ -1,6 +1,12 @@
 <script>
   (function() {
     'use strict'
+    let minInterval = function minInt(int, value) {
+      let start = ((int * value) / 60 | 0) + ':' + (int * value) % 60
+      let end = ((int * (value + 1)) / 60 | 0) + ':' + (int * (value + 1)) % 60;
+      return start + '-' + end;
+    };
+
     let registry = {
       Ticket: {
         captions: {
@@ -12,9 +18,24 @@
           '10minute': '10 минут'
         },
         labels: {
-          'month': "месяц",
-          'week-day': "день недели",
-          'month-day': "день",
+          'month': function monthT(value) {
+            return moment().month(parseInt(value) + 1).format('MMM')
+          },
+          'week-day': function wdT(value) {
+            return moment().isoWeekday(value).format('ddd');
+          },
+          'month-day': function mdT(value) {
+            return value + 1;
+          },
+          '60minute': function sminute(value) {
+            return minInterval(60, value)
+          },
+          '10minute': function sminute(value) {
+            return minInterval(10, value)
+          },
+          '5minute': function sminute(value) {
+            return minInterval(5, value)
+          },
           'dont-know': 'Пуам!'
         }
       }
@@ -31,13 +52,23 @@
         let parts = value.split('--');
         let val = parts[0];
         let type = parts[1];
-        return val;
+        let translator = _.get(registry, [entity, 'labels', type]) || ((r) => r);
+        console.log(entity, 'labels', type, translator);
+        console.log(translator(val));
+        return translator instanceof Function ? translator(val) : val;
       },
       translateCaption(entity, value) {
-        let caption = _.get(registry, [entity, 'captions', value]) || _.get(registry, [entity, 'captions', value])
+        let caption = _.get(registry, [entity, 'captions', value])
+        console.log(caption);
         return caption;
       }
     };
 
   })();
+</script>
+og(caption); return caption; } }; })();
+</script>
+
+</script>
+og(caption); return caption; } }; })();
 </script>
