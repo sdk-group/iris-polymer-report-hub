@@ -28,6 +28,9 @@
     <style>
       :host {
         @apply(--layout-vertical);
+        --paper-spinner-stroke-width: 10px;
+        --paper-spinner-layer-1-color: #C79B65;
+        --paper-spinner-layer-2-color: #4a2015;
       }
 
       iron-pages {
@@ -109,9 +112,54 @@
         height: 72px;
         color: var(--mydoc-beige-800, cornflowerblue);
       }
+
+      #table-tab {
+        overflow-x: scroll;
+        padding: 0;
+      }
+
+      report-nested-table {
+        padding: 10px;
+      }
+
+      #report-table {
+        display: table;
+      }
+
+      #action-buttons {
+        height: 50px;
+      }
+
+      #message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        font-size: 26px;
+      }
+
+      paper-spinner {
+        width: 75px;
+        height: 75px;
+      }
+
+      #download {
+        padding: 10px;
+      }
+
+      #table paper-button {
+        width: 150px;
+        font-size: 14px;
+        height: 35px;
+        padding: 0;
+        margin: 0;
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
+    <iris-currentuser id="user" permissions="{{permissions}}"></iris-currentuser>
+
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
     </paper-material>
@@ -132,7 +180,7 @@
 
       <div id="template-office">
         <paper-material elevation="1">
-          <iris-table data="[[offices]]" multiselect fields-model="[[tableModel]]" selected="{{selectedOffices}}"></iris-table>
+          <iris-table data="[[computeOffices(permissions)]]" multiselect fields-model="[[tableModel]]" selected="{{selectedOffices}}"></iris-table>
         </paper-material>
       </div>
 
@@ -155,140 +203,178 @@
       </div>
 
       <div id="table">
-        <report-nested-table entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+        <paper-material id="table-tab" elevation="1">
+          <div id="message" hidden$="[[!spinnerActive]]">
+            <paper-spinner active id="spinner"></paper-spinner>
+            Обработка
+          </div>
+          <paper-button hidden$="[[spinnerActive]]" on-tap="download">
+            <iron-icon id="download" icon="file-download"></iron-icon>
+            Скачать
+          </paper-button>
+          <report-nested-table hidden$="[[spinnerActive]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+        </paper-material>
       </div>
+
     </iron-pages>
     <paper-material id="action-buttons" elevation="1">
-      <paper-button>Назад</paper-button>
+
+      <paper-button disabled$="[[canBack(selectedPage)]]" on-tap="previousPage">Назад</paper-button>
       <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups)]]" on-tap="nextPage">Далее</paper-button>
     </paper-material>
   </template>
   <script>
-    'use strict'
-    const group_delimiter = '::';
+    (function() {
+      'use strict'
+      const group_delimiter = '::';
 
-    let table_draft = {
-      interval: [
-        "2016-04-07", "2016-04-14"
-      ],
-      entity: "Ticket",
-      interval_field: "dedicated_date",
-      department: [
-        'department-1', 'department-2'
-      ],
-      group: [{
-        method: 'enum',
-        field: "org_destination"
-      }, {
-        method: 'month',
-        field: 'booking_date'
-      }, {
-        method: 'week-day',
-        field: 'booking_date'
-      }],
-      params: [{
-        label: "Param 1",
-        key: "id",
-        aggregator: "count", //String const
-        filter: [],
-        meta: false
-      }]
-    };
+      function dow(filename, text) {
+        // Set up the link
+        var link = document.createElement("a");
+        link.setAttribute("target", "_blank");
+        var blob = new Blob([text], {
+          encoding: "UTF-8",
+          type: "text/plain;charset=UTF-8"
+        });
+        link.setAttribute("href", URL.createObjectURL(blob));
 
-    Polymer({
-      is: 'iris-report-hub',
-      ready() {
-        this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Результат'];
-        this.states = Array(this.steps.length);
-        this.selectedPage = 0;
-
-        this.endHours = '23';
-        this.endMinutes = '59';
-
-        this.entities = ReportHubData.entities;
-        this.offices = ReportHubData.offices;
-        this.startDate = false;
-        this.endDate = false;
-        this.selectedOffices = [];
-        this.tableModel = [{
-          field: 'label',
-          label: "Офис"
-        }];
-      },
-      checkAll() {
-        console.log('All');
-      },
-      nextPage() {
-        this.states[this.selectedPage] = true;
-        this.selectedPage += 1;
-
-        if ((this.selectedPage + 1) == this.steps.length) {
-          console.log('request server');
-
-          let interval = [this.startDate, this.endDate];
-          let template = this.selectedTemplate;
-
-          template.department = _.map(this.selectedOffices, 'id');
-          template.interval = interval;
-          template.group = this.groups;
-
-          let header_labels = _.map(template.group, 'method').join(group_delimiter);
-          let labels = _.map(template.params, 'label');
-
-          this.$.reporter.getTable({
-            table: template
-          }).then((data) => {
-            console.log('response', data);
-            let keys = _.sortBy(_.keys(data));
-            _.set(data, header_labels, labels);
-
-            let map = {};
-            _.set(map, _.map(template.group, 'method'), true, Object);
-
-            _.forEach(keys, key => {
-              let parts = key.split(group_delimiter);
-              _.setWith(map, parts, true, Object);
-            });
-
-            let rows = {
-              keys: _.keys(template.params)
-            };
-
-            this.set('tableData', data);
-            this.set('rows', rows);
-            this.set('tableMap', map);
-          });
-        }
-      },
-      canNext(page, template_id, length, startDate, endDate, groups) {
-        console.log(startDate, endDate);
-        switch (page) {
-          case 0:
-            return !template_id;
-            break;
-          case 2:
-            return !length;
-            break;
-          case 3:
-            return !(startDate && endDate && endDate >= startDate);
-            break;
-          default:
-            return false;
-        }
-      },
-      getRows(d) {
-        return _.keys(d);
-      },
-      getColls(ri) {
-        return _.keys(this.tableData[ri])
-      },
-      getCell(rowindex, cell) {
-        return _.get(this.tableData, [rowindex, cell]);
-      },
-      translateKey(key) {
-        return parseInt(key.split('::')[2])
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-    });
+
+      Polymer({
+        is: 'iris-report-hub',
+        observers: ['_pChange(permissions)'],
+        _pChange(permissions) {
+          //@NOTE: dirty translation hack for oren
+          this.$['report-table'].addTranslation('Ticket', 'enum', function(d) {
+            return permissions["can-report"][d]
+          });
+        },
+        download() {
+          dow('table.xls', this.$["report-table"].innerHTML);
+        },
+        ready() {
+          this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Результат'];
+          this.states = Array(this.steps.length);
+          this.selectedPage = 0;
+          this.spinnerActive = false;
+
+          this.endHours = '23';
+          this.endMinutes = '59';
+
+          this.entities = ReportHubData.entities;
+          this.offices = ReportHubData.offices;
+          this.startDate = false;
+          this.endDate = false;
+          this.selectedOffices = [];
+          this.tableModel = [{
+            field: 'label',
+            label: "Офис"
+          }];
+        },
+        canBack(selectedPage) {
+          return !selectedPage;
+        },
+        previousPage() {
+          this.selectedPage -= 1;
+        },
+        computeOffices(permissions) {
+          if (permissions["can-report"]) {
+            return _.reduce(permissions["can-report"], (a, label, office) => {
+              label && a.push({
+                id: office,
+                label: label
+              });
+              return a
+            }, [])
+          }
+          return [];
+        },
+        nextPage() {
+          this.states[this.selectedPage] = true;
+          this.selectedPage += 1;
+
+          if ((this.selectedPage + 1) == this.steps.length) {
+            console.log('request server');
+
+            let interval = [this.startDate, this.endDate];
+            let template = this.selectedTemplate;
+
+            template.department = _.map(this.selectedOffices, 'id');
+            template.interval = interval;
+            template.group = this.groups;
+            let label_path = _.map(template.group, 'method');
+            let header_labels = label_path.join(group_delimiter) || 'labels';
+            let labels = _.map(template.params, 'label');
+
+            this.set('tableData', false);
+            this.set('rows', false);
+            this.set('tableMap', false);
+
+            this.spinnerActive = true;
+
+            this.$.reporter.getTable({
+              table: template
+            }).then((data) => {
+              this.spinnerActive = false;
+
+              console.log('response', data);
+              let keys = _.sortBy(_.keys(data));
+              _.set(data, header_labels, labels);
+
+              let map = {};
+              _.set(map, label_path.join('.') || 'labels', true, Object);
+
+              _.forEach(keys, key => {
+                let parts = key.split(group_delimiter);
+                _.setWith(map, parts, true, Object);
+              });
+
+              let rows = {
+                keys: _.keys(template.params)
+              };
+
+              this.set('tableData', data);
+              this.set('rows', rows);
+              this.set('tableMap', map);
+            });
+          }
+        },
+        canNext(page, template_id, length, startDate, endDate, groups) {
+          switch (page) {
+            case 0:
+              return !template_id.params.length;
+              break;
+            case 2:
+              return !length;
+              break;
+            case 3:
+              return !(startDate && endDate && endDate >= startDate);
+              break;
+            case 4:
+              return true;
+              break;
+            default:
+              return false;
+          }
+        },
+        getRows(d) {
+          return _.keys(d);
+        },
+        getColls(ri) {
+          return _.keys(this.tableData[ri])
+        },
+        getCell(rowindex, cell) {
+          return _.get(this.tableData, [rowindex, cell]);
+        },
+        translateKey(key) {
+          return parseInt(key.split('::')[2])
+        }
+      });
+    })();
   </script>
 </dom-module>
 pt>

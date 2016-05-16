@@ -48,76 +48,79 @@
       },
       ready() {
         this.variants = [{
-          header: "Год",
-          selected: 'no',
-          content: [{
-            label: 'Нет',
-            code: 'no'
+            header: "Год",
+            selected: 'no',
+            content: [{
+              label: 'Нет',
+              code: 'no'
+            }, {
+              label: 'Месяцы',
+              code: {
+                method: 'month',
+                field: 'dedicated_date'
+              }
+            }]
           }, {
-            label: 'Месяцы',
-            code: {
-              method: 'month',
-              field: 'booking_date'
-            }
-          }]
-        }, {
-          header: "Месяц",
-          selected: 'no',
-          content: [{
-            label: 'Нет',
-            code: 'no'
-          }, {
-            label: "Дни",
-            code: {
-              method: 'month-day',
-              field: 'booking_date'
-            }
-          }, {
-            label: "Дни недели",
-            code: {
-              method: 'week-day',
-              field: 'booking_date'
-            }
-          }]
-        }, {
-          header: "День",
-          selected: 'no',
-          content: [{
-            label: 'Нет',
-            code: 'no'
-          }, {
-            label: "10 минут",
-            code: {
-              method: '10minute',
-              field: 'booking_date'
-            }
-          }, {
-            label: "30 минут",
-            code: {
-              method: '30minute',
-              field: 'booking_date'
-            }
-          }, {
-            label: "1 час",
-            code: {
-              method: '60minute',
-              field: 'booking_date'
-            }
-          }]
-        }, {
-          header: "Дополнительно",
-          selected: 'no',
-          content: [{
-            label: 'Нет',
-            code: 'no'
-          }, {
-            label: "офис",
-            code: {
-              method: 'enum',
-              field: 'org_destination'
-            }
-          }]
-        }];
+            header: "Месяц",
+            selected: 'no',
+            content: [{
+              label: 'Нет',
+              code: 'no'
+            }, {
+              label: "Дни",
+              code: {
+                method: 'month-day',
+                field: 'dedicated_date'
+              }
+            }, {
+              label: "Дни недели",
+              code: {
+                method: 'week-day',
+                field: 'dedicated_date'
+              }
+            }]
+          },
+          // {
+          //   header: "День",
+          //   selected: 'no',
+          //   content: [{
+          //     label: 'Нет',
+          //     code: 'no'
+          //   }, {
+          //     label: "10 минут",
+          //     code: {
+          //       method: '10minute',
+          //       field: 'booking_date'
+          //     }
+          //   }, {
+          //     label: "30 минут",
+          //     code: {
+          //       method: '30minute',
+          //       field: 'booking_date'
+          //     }
+          //   }, {
+          //     label: "1 час",
+          //     code: {
+          //       method: '60minute',
+          //       field: 'booking_date'
+          //     }
+          //   }]
+          // }, 
+          {
+            header: "Дополнительно",
+            selected: 'no',
+            content: [{
+              label: 'Нет',
+              code: 'no'
+            }, {
+              label: "офис",
+              code: {
+                method: 'enum',
+                field: 'org_destination'
+              }
+            }]
+          }
+        ];
 
       }
     });

@@ -1,82 +1,84 @@
 <script>
   window.ReportHubData = {
     entities: [{
-      label: "Талоны",
-      entity: "Ticket",
-      interval_field: "dedicated_date",
-      templates: [{
-        id: "ticket-booked",
-        label: "Количество забронированных талонов",
-        description: "Все талоны имевшие состояние «Забронирован»",
-        aggregator: "count",
-        filter: ['hasEventBook']
-      }, {
-        id: "ticket-services",
-        label: "Количество забронированных услуг",
-        description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
-        key: "service_count",
-        aggregator: "sum",
-        filter: ['hasEventBook']
-      }, {
-        id: "ticket-unregistered",
-        label: "Количество не активированных броней",
-        description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
-        aggregator: "sum",
-        filter: ['state = expired', '!hasEventActivate']
-      }, {
-        id: "ticket-registered",
-        label: "Количество выданных талонов",
-        description: "Все талоны имевшие состояние «Зарегистрирован»",
-        aggregator: "count",
-        filter: ['hasEventRegister']
-      }, {
-        id: "ticket-requested-services",
-        label: "Количество запрошенных услуг",
-        description: "Количество услуг, содержащихся в «Выданных талонах»",
-        key: "service_count",
-        aggregator: "sum",
-        filter: ['hasEventRegister']
-      }, {
-        id: "ticket-called",
-        label: "Количество вызовов талонов",
-        description: "Все талоны имевшие состояние «Вызван»",
-        aggregator: "count",
-        filter: ['hasEventCall']
-      }, {
-        id: "ticket-processed",
-        label: "Количество обслуженных талонов",
-        description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»",
-        aggregator: "count",
-        filter: ['hasEventClose']
-      }, {
-        id: "ticket-processed-services",
-        label: "Количество предоставленных услуг",
-        description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»",
-        key: "service_count",
-        aggregator: "sum",
-        filter: ['hasEventClose']
-      }, {
-        id: "ticket-client-not-arrived",
-        label: "Количество неподошедших посетителей",
-        description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
-        aggregator: "count",
-        filter: ['state = expired']
-      }, {
-        id: "ticket-client-not-processed",
-        label: "Количество необслуженных посетителей",
-        description: "Все талоны не имевшие состояние «Завершен» на конец дня",
-        aggregator: "count",
-        filter: ['!hasEventClose']
-      }]
-    }, {
-      label: "Сотрудники",
-      type: "Employee",
-      templates: [{
-        id: "employee-first",
-        label: "Какой-то отчет по сторудникам ",
-        description: "Long and cool template description "
-      }]
-    }],
+        label: "Талоны",
+        entity: "Ticket",
+        interval_field: "dedicated_date",
+        templates: [{
+          id: "ticket-booked",
+          label: "Количество забронированных талонов",
+          description: "Все талоны имевшие состояние «Забронирован»",
+          aggregator: "count",
+          filter: ['hasEventBook']
+        }, {
+          id: "ticket-services",
+          label: "Количество забронированных услуг",
+          description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
+          key: "service_count",
+          aggregator: "sum",
+          filter: ['hasEventBook']
+        }, {
+          id: "ticket-unregistered",
+          label: "Количество не активированных броней",
+          description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
+          aggregator: "sum",
+          filter: ['state = expired', '!hasEventActivate']
+        }, {
+          id: "ticket-registered",
+          label: "Количество выданных талонов",
+          description: "Все талоны имевшие состояние «Зарегистрирован»",
+          aggregator: "count",
+          filter: ['hasEventRegister']
+        }, {
+          id: "ticket-requested-services",
+          label: "Количество запрошенных услуг",
+          description: "Количество услуг, содержащихся в «Выданных талонах»",
+          key: "service_count",
+          aggregator: "sum",
+          filter: ['hasEventRegister']
+        }, {
+          id: "ticket-called",
+          label: "Количество вызовов талонов",
+          description: "Все талоны имевшие состояние «Вызван»",
+          aggregator: "count",
+          filter: ['hasEventCall']
+        }, {
+          id: "ticket-processed",
+          label: "Количество обслуженных талонов",
+          description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»",
+          aggregator: "count",
+          filter: ['hasEventClose']
+        }, {
+          id: "ticket-processed-services",
+          label: "Количество предоставленных услуг",
+          description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»",
+          key: "service_count",
+          aggregator: "sum",
+          filter: ['hasEventClose']
+        }, {
+          id: "ticket-client-not-arrived",
+          label: "Количество неподошедших посетителей",
+          description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
+          aggregator: "count",
+          filter: ['state = expired', '!hasEventBook']
+        }, {
+          id: "ticket-client-not-processed",
+          label: "Количество необслуженных посетителей",
+          description: "Все талоны не имевшие состояние «Завершен» на конец дня",
+          aggregator: "count",
+          filter: ['!hasEventClose']
+        }]
+      }
+      // , {
+      //   label: "Сотрудники",
+      //   type: "Employee",
+      //   templates: [{
+      //     id: "employee-first",
+      //     label: "Какой-то отчет по сторудникам ",
+      //     description: "Long and cool template description "
+      //   }]
+      // }
+    ],
     offices: [{
         id: 'department-1',
         label: 'Офис 1'

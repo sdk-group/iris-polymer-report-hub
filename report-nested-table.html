@@ -16,6 +16,7 @@
       th {
         border-top: 1px solid;
         border-left: 1px solid;
+        padding: 5px 10px;
       }
 
       table {
@@ -24,12 +25,21 @@
         white-space: nowrap;
       }
 
+      table.top {
+        border: solid 1px black;
+      }
+
+      .top > tbody > tr:nth-child(2) > td:nth-child(1) th {
+        border-left: none;
+      }
+
       .data-cell {
-        border: 1px solid;
+        border-top: 1px solid;
+        border-right: 1px solid;
       }
     </style>
 
-    <table>
+    <table class$="[[isTop(path)]]">
       <tr>
         <template is="dom-repeat" items="[[keys]]">
           <th>
@@ -82,7 +92,9 @@
           value: {}
         }
       },
-
+      isTop(path) {
+        return path.length ? '' : 'top';
+      },
       computePath(item) {
         return _.union(this.path, [item]);
       },

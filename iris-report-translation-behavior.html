@@ -2,8 +2,9 @@
   (function() {
     'use strict'
     let minInterval = function minInt(int, value) {
-      let start = ((int * value) / 60 | 0) + ':' + (int * value) % 60
-      let end = ((int * (value + 1)) / 60 | 0) + ':' + (int * (value + 1)) % 60;
+      let val = parseInt(value);
+      let start = _.padStart(((int * val) / 60 | 0), 2, '0') + ':' + _.padStart((int * val) % 60, 2, '0');
+      let end = _.padStart(((int * (val + 1)) / 60 | 0), 2, '0') + ':' + _.padStart((int * (val + 1)) % 60, 2, '0');
       return start + '-' + end;
     };
 
@@ -15,17 +16,20 @@
           'month-day': "день",
           '60minute': 'час',
           '30minute': '30 минут',
-          '10minute': '10 минут'
+          '10minute': '10 минут',
+          "enum": "офис",
+          'nogroup': 'значение',
+          'labels': 'параметр'
         },
         labels: {
           'month': function monthT(value) {
-            return moment().month(parseInt(value) + 1).format('MMM')
+            return moment().month(parseInt(value) - 1).format('MMM')
           },
           'week-day': function wdT(value) {
             return moment().isoWeekday(value).format('ddd');
           },
           'month-day': function mdT(value) {
-            return value + 1;
+            return parseInt(value);
           },
           '60minute': function sminute(value) {
             return minInterval(60, value)
@@ -33,10 +37,13 @@
           '10minute': function sminute(value) {
             return minInterval(10, value)
           },
+          '30minute': function sminute(value) {
+            return minInterval(30, value)
+          },
           '5minute': function sminute(value) {
             return minInterval(5, value)
           },
-          'dont-know': 'Пуам!'
+          'nogroup': '-'
         }
       }
     };
@@ -45,7 +52,6 @@
     IrisBehaviors.TranslationBehvior = {
       translate(entity, value) {
         let is_caption = !~value.indexOf('--');
-        console.log('is_caption', is_caption);
         return is_caption ? this.translateCaption(entity, value) : this.translateLabel(entity, value);
       },
       translateLabel(entity, value) {
@@ -53,22 +59,18 @@
         let val = parts[0];
         let type = parts[1];
         let translator = _.get(registry, [entity, 'labels', type]) || ((r) => r);
-        console.log(entity, 'labels', type, translator);
-        console.log(translator(val));
+        // console.log(entity, 'labels', type, translator);
+        // console.log(translator(val));
         return translator instanceof Function ? translator(val) : val;
       },
       translateCaption(entity, value) {
         let caption = _.get(registry, [entity, 'captions', value])
-        console.log(caption);
         return caption;
+      },
+      addTranslation(entity, type, tr) {
+        _.set(registry, [entity, 'labels', type], tr)
       }
     };
 
   })();
-</script>
-og(caption); return caption; } }; })();
-</script>
-
-</script>
-og(caption); return caption; } }; })();
 </script>
