@@ -19,14 +19,24 @@
       .header {
         width: 150px;
       }
+
+      .controls {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
     </style>
 
-    <template is="dom-repeat" items="[[variants]]" as="group">
+    <template id="groups" is="dom-repeat" items="[[variants]]" as="group">
       <div class="group-variants">
+        <div class="controls">
+
+          <paper-icon-button disabled="[[!canUp(index)]]" icon="expand-less" on-tap="groupUp"></paper-icon-button>
+          <paper-icon-button disabled="[[!canDown(index,variants.length)]]" icon="expand-more" on-tap="groupDown"></paper-icon-button>
+        </div>
         <span class="header">
           [[group.header]]
         </span>
-        <iris-button-group selected="{{group.selected}}" buttons="[[group.content]]" on-tap="selectGroup"></iris-button-group>
+        <iris-button-group selected="{{group.selected}}" selected-index="{{group.index}}" buttons="[[group.content]]" on-tap="selectGroup"></iris-button-group>
       </div>
     </template>
 
@@ -40,87 +50,133 @@
           type: Array,
           notify: true,
           value: []
+        },
+        captions: {
+          type: Array,
+          value: [],
+          notify: true
         }
+      },
+      canUp(i) {
+        return !!i;
+      },
+      canDown(i, len) {
+        return i != (len - 1);
+      },
+      groupUp(e) {
+        let index = e.model.index;
+        let temp = _.cloneDeep(this.variants[index - 1]);
+
+        let group = _.map(this.variants, (item, counter) => {
+          if (counter == index) return temp;
+          if (counter == index - 1) return this.variants[index];
+          return item;
+        });
+        this.variants = group;
+      },
+      groupDown(e) {
+        let index = e.model.index;
+        let temp = _.cloneDeep(this.variants[index]);
+        let group = _.map(this.variants, (item, counter) => {
+          if (counter == index) return this.variants[counter + 1];
+          if (counter == index + 1) return temp;
+          return item;
+        });
+        this.variants = group;
       },
       selectGroup() {
         let result = _.reduce(this.variants, (a, g) => (g.selected !== 'no') ? a.push(g.selected) && a : a, []);
+        let caps = _.reduce(this.variants, (a, g, i) => (g.selected !== 'no') ? a.push(g.content[g.index].label) && a : a, []);
         this.set('groups', result);
+        this.set('captions', caps);
       },
       ready() {
         this.variants = [{
-            header: "Год",
-            selected: 'no',
-            content: [{
-              label: 'Нет',
-              code: 'no'
-            }, {
-              label: 'Месяцы',
-              code: {
-                method: 'month',
-                field: 'dedicated_date'
-              }
-            }]
+          header: "Год",
+          selected: 'no',
+          index: 0,
+          content: [{
+            label: 'Нет',
+            code: 'no'
           }, {
-            header: "Месяц",
-            selected: 'no',
-            content: [{
-              label: 'Нет',
-              code: 'no'
-            }, {
-              label: "Дни",
-              code: {
-                method: 'month-day',
-                field: 'dedicated_date'
-              }
-            }, {
-              label: "Дни недели",
-              code: {
-                method: 'week-day',
-                field: 'dedicated_date'
-              }
-            }]
-          },
-          // {
-          //   header: "День",
-          //   selected: 'no',
-          //   content: [{
-          //     label: 'Нет',
-          //     code: 'no'
-          //   }, {
-          //     label: "10 минут",
-          //     code: {
-          //       method: '10minute',
-          //       field: 'booking_date'
-          //     }
-          //   }, {
-          //     label: "30 минут",
-          //     code: {
-          //       method: '30minute',
-          //       field: 'booking_date'
-          //     }
-          //   }, {
-          //     label: "1 час",
-          //     code: {
-          //       method: '60minute',
-          //       field: 'booking_date'
-          //     }
-          //   }]
-          // }, 
-          {
-            header: "Дополнительно",
-            selected: 'no',
-            content: [{
-              label: 'Нет',
-              code: 'no'
-            }, {
-              label: "офис",
-              code: {
-                method: 'enum',
-                field: 'org_destination'
-              }
-            }]
-          }
-        ];
+            label: 'Месяцы',
+            code: {
+              method: 'month',
+              field: 'dedicated_date'
+            }
+          }]
+        }, {
+          header: "Месяц",
+          selected: 'no',
+          index: 0,
+          content: [{
+            label: 'Нет',
+            code: 'no'
+          }, {
+            label: "Дни",
+            code: {
+              method: 'month-day',
+              field: 'dedicated_date'
+            }
+          }, {
+            label: "Дни недели",
+            code: {
+              method: 'week-day',
+              field: 'dedicated_date'
+            }
+          }]
+        }, {
+          header: "День",
+          selected: 'no',
+          index: 0,
+          content: [{
+            label: 'Нет',
+            code: 'no'
+          }, {
+            label: "10 минут",
+            code: {
+              method: '10minute'
+            }
+          }, {
+            label: "30 минут",
+            code: {
+              method: '30minute'
+            }
+          }, {
+            label: "1 час",
+            code: {
+              method: '60minute'
+            }
+          }]
+        }, {
+          header: "Дополнительно",
+          selected: 'no',
+          index: 0,
+          content: [{
+            label: 'Нет',
+            code: 'no'
+          }, {
+            label: "Офис",
+            code: {
+              method: 'enum',
+              field: 'org_destination'
+            }
+          }]
+        }, {
+          header: "Услуга",
+          selected: 'no',
+          index: 0,
+          content: [{
+            label: 'Нет',
+            code: 'no'
+          }, {
+            label: "Услуга",
+            code: {
+              method: 'enum',
+              field: 'service'
+            }
+          }]
+        }];
 
       }
     });

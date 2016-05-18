@@ -59,7 +59,7 @@
       </template>
 
       <template is="dom-if" if="[[!hasSubmap(map,keys)]]">
-        <template is="dom-repeat" items="[[rows.keys]]" as="row">
+        <template is="dom-repeat" items="[[rows]]" as="row">
           <tr>
             <template is="dom-repeat" items="[[keys]]">
               <td class="data-cell">
@@ -88,7 +88,7 @@
           value: []
         },
         rows: {
-          type: Object,
+          type: Array,
           value: {}
         }
       },

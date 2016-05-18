@@ -130,6 +130,10 @@
         height: 50px;
       }
 
+      #service-table-tab {
+        overflow-y: scroll;
+      }
+
       #message {
         display: flex;
         flex-direction: column;
@@ -159,6 +163,7 @@
 
     <iris-workstation id="reporter"></iris-workstation>
     <iris-currentuser id="user" permissions="{{permissions}}"></iris-currentuser>
+    <iris-shared-entities id="shared" namespace="services" key="ALL" value="{{services}}"></iris-shared-entities>
 
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
@@ -174,13 +179,13 @@
 
       <div id="group-selector">
         <paper-material elevation="1">
-          <report-group-maker groups="{{groups}}"></report-group-maker>
+          <report-group-maker groups="{{groups}}" captions="{{captions}}"></report-group-maker>
         </paper-material>
       </div>
 
       <div id="template-office">
         <paper-material elevation="1">
-          <iris-table data="[[computeOffices(permissions)]]" multiselect fields-model="[[tableModel]]" selected="{{selectedOffices}}"></iris-table>
+          <iris-table data="[[computeOffices(permissions)]]" multiselect fields-model='{"label": "Офис"}' selected="{{selectedOffices}}"></iris-table>
         </paper-material>
       </div>
 
@@ -202,17 +207,23 @@
         </div>
       </div>
 
+      <div id="service-picker">
+        <paper-material id="service-table-tab" elevation="1">
+          <iris-table data="[[_toArray(services)]]" multiselect fields-model='{"label": "Услуга","id":"ID"}' selected="{{selectedServices}}" selection-field="id"></iris-table>
+        </paper-material>
+      </div>
+
       <div id="table">
         <paper-material id="table-tab" elevation="1">
-          <div id="message" hidden$="[[!spinnerActive]]">
+          <div id="message" hidden$="[[!tableLoading]]">
             <paper-spinner active id="spinner"></paper-spinner>
             Обработка
           </div>
-          <paper-button hidden$="[[spinnerActive]]" on-tap="download">
+          <paper-button hidden$="[[tableLoading]]" on-tap="download">
             <iron-icon id="download" icon="file-download"></iron-icon>
             Скачать
           </paper-button>
-          <report-nested-table hidden$="[[spinnerActive]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+          <report-nested-table hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
         </paper-material>
       </div>
 
@@ -220,7 +231,7 @@
     <paper-material id="action-buttons" elevation="1">
 
       <paper-button disabled$="[[canBack(selectedPage)]]" on-tap="previousPage">Назад</paper-button>
-      <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups)]]" on-tap="nextPage">Далее</paper-button>
+      <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups,selectedServices.length)]]" on-tap="nextPage">Далее</paper-button>
     </paper-material>
   </template>
   <script>
@@ -248,19 +259,26 @@
         is: 'iris-report-hub',
         observers: ['_pChange(permissions)'],
         _pChange(permissions) {
-          //@NOTE: dirty translation hack for oren
-          this.$['report-table'].addTranslation('Ticket', 'enum', function(d) {
-            return permissions["can-report"][d]
+          //@NOTE: not so dirty translation hack for oren
+          this.$['report-table'].addTranslation('Ticket', 'enum-org_destination', function(d) {
+            return permissions["can-report"][d] || d
           });
+
+          this.$['report-table'].addTranslation('Ticket', 'enum-service', (service_id) => {
+            return this.$.shared.get(service_id).label || service_id
+          });
+        },
+        _toArray(obj) {
+          return _.values(obj)
         },
         download() {
           dow('table.xls', this.$["report-table"].innerHTML);
         },
         ready() {
-          this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Результат'];
+          this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Услуги', 'Результат'];
           this.states = Array(this.steps.length);
           this.selectedPage = 0;
-          this.spinnerActive = false;
+          this.tableLoading = false;
 
           this.endHours = '23';
           this.endMinutes = '59';
@@ -270,10 +288,6 @@
           this.startDate = false;
           this.endDate = false;
           this.selectedOffices = [];
-          this.tableModel = [{
-            field: 'label',
-            label: "Офис"
-          }];
         },
         canBack(selectedPage) {
           return !selectedPage;
@@ -281,6 +295,7 @@
         previousPage() {
           this.selectedPage -= 1;
         },
+
         computeOffices(permissions) {
           if (permissions["can-report"]) {
             return _.reduce(permissions["can-report"], (a, label, office) => {
@@ -293,57 +308,67 @@
           }
           return [];
         },
+        flushTable() {
+          this.initTable(false, false, false);
+        },
+        initTable(data, rows, map) {
+          this.tableLoading = !(data && rows && map);
+          this.set('tableData', data);
+          this.set('rows', rows);
+          this.set('tableMap', map);
+        },
+        finalStep() {
+          this.flushTable();
+
+          console.log('request server');
+
+          let interval = [this.startDate, this.endDate];
+          let template = _.cloneDeep(this.selectedTemplate);
+
+          template.department = _.map(this.selectedOffices, 'id');
+          template.interval = interval;
+          template.group = this.groups;
+
+          if (this.selectedServices.length && this.selectedServices.length != _.size(this.services)) {
+            let condition = "service in " + this.selectedServices.join(',');
+            _.forEach(template.params, param => param.filter.push(condition));
+          }
+
+          let label_path = _.map(template.group, 'method');
+          let header_labels = _.isEmpty(this.captions) ? ['Параметры'] : this.captions;
+          let labels = _.map(template.params, 'label');
+
+
+          this.$.reporter.getTable({
+            table: template
+          }).then((data) => {
+            console.log('response', data);
+            let keys = _.sortBy(_.keys(data));
+            //@NOTE: add row labels to data
+            //@NOTE: path is translated string
+            _.set(data, header_labels.join(group_delimiter), labels);
+
+            let map = _.setWith({}, header_labels, true, Object);
+
+            _.forEach(keys, key => {
+              let parts = key.split(group_delimiter);
+              _.setWith(map, parts, true, Object);
+            });
+
+            let rows = _.keys(template.params);
+
+            this.initTable(data, rows, map);
+          }).catch((e) => {
+            console.log('bad news:', e);
+          });
+        },
         nextPage() {
           this.states[this.selectedPage] = true;
           this.selectedPage += 1;
 
-          if ((this.selectedPage + 1) == this.steps.length) {
-            console.log('request server');
-
-            let interval = [this.startDate, this.endDate];
-            let template = this.selectedTemplate;
-
-            template.department = _.map(this.selectedOffices, 'id');
-            template.interval = interval;
-            template.group = this.groups;
-            let label_path = _.map(template.group, 'method');
-            let header_labels = label_path.join(group_delimiter) || 'labels';
-            let labels = _.map(template.params, 'label');
-
-            this.set('tableData', false);
-            this.set('rows', false);
-            this.set('tableMap', false);
-
-            this.spinnerActive = true;
-
-            this.$.reporter.getTable({
-              table: template
-            }).then((data) => {
-              this.spinnerActive = false;
-
-              console.log('response', data);
-              let keys = _.sortBy(_.keys(data));
-              _.set(data, header_labels, labels);
-
-              let map = {};
-              _.set(map, label_path.join('.') || 'labels', true, Object);
-
-              _.forEach(keys, key => {
-                let parts = key.split(group_delimiter);
-                _.setWith(map, parts, true, Object);
-              });
-
-              let rows = {
-                keys: _.keys(template.params)
-              };
-
-              this.set('tableData', data);
-              this.set('rows', rows);
-              this.set('tableMap', map);
-            });
-          }
+          if ((this.selectedPage + 1) == this.steps.length) this.finalStep();
         },
-        canNext(page, template_id, length, startDate, endDate, groups) {
+        canNext(page, template_id, length, startDate, endDate, groups, selectedServices) {
           switch (page) {
             case 0:
               return !template_id.params.length;
@@ -354,7 +379,7 @@
             case 3:
               return !(startDate && endDate && endDate >= startDate);
               break;
-            case 4:
+            case 5:
               return true;
               break;
             default:
@@ -376,6 +401,4 @@
       });
     })();
   </script>
-</dom-module>
-pt>
 </dom-module>

@@ -11,15 +11,7 @@
     let registry = {
       Ticket: {
         captions: {
-          'month': "месяц",
-          'week-day': "день недели",
-          'month-day': "день",
-          '60minute': 'час',
-          '30minute': '30 минут',
-          '10minute': '10 минут',
-          "enum": "офис",
-          'nogroup': 'значение',
-          'labels': 'параметр'
+          'nogroup': 'значение'
         },
         labels: {
           'month': function monthT(value) {
@@ -59,12 +51,10 @@
         let val = parts[0];
         let type = parts[1];
         let translator = _.get(registry, [entity, 'labels', type]) || ((r) => r);
-        // console.log(entity, 'labels', type, translator);
-        // console.log(translator(val));
         return translator instanceof Function ? translator(val) : val;
       },
       translateCaption(entity, value) {
-        let caption = _.get(registry, [entity, 'captions', value])
+        let caption = _.get(registry, [entity, 'captions', value]) || value;
         return caption;
       },
       addTranslation(entity, type, tr) {
