@@ -73,6 +73,7 @@
           return item;
         });
         this.variants = group;
+        this.selectGroup();
       },
       groupDown(e) {
         let index = e.model.index;
@@ -83,6 +84,7 @@
           return item;
         });
         this.variants = group;
+        this.selectGroup();
       },
       selectGroup() {
         let result = _.reduce(this.variants, (a, g) => (g.selected !== 'no') ? a.push(g.selected) && a : a, []);
