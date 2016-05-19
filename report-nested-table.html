@@ -6,6 +6,7 @@
     <style>
       :host {
         display: block;
+        --nested-table-border-color: #c3c3c3;
       }
 
       td {
@@ -14,33 +15,33 @@
       }
 
       th {
-        border-top: 1px solid;
-        border-left: 1px solid;
+        border: 1px solid var(--nested-table-border-color);
         padding: 5px 10px;
       }
 
       table {
-        border-collapse: collapse;
         width: 100%;
         white-space: nowrap;
       }
 
       table.top {
-        border: solid 1px black;
+        border: 1px solid var(--nested-table-border-color);
       }
-
-      .top > tbody > tr:nth-child(2) > td:nth-child(1) th {
+      /*.top > tbody > tr:nth-child(2) > td:nth-child(1) th {
         border-left: none;
-      }
+      }*/
 
       .data-cell {
-        border-top: 1px solid;
-        border-right: 1px solid;
+        border: 1px solid var(--nested-table-border-color);
+      }
+
+      tr.header-row:hover th {
+        border-color: red;
       }
     </style>
 
-    <table class$="[[isTop(path)]]">
-      <tr>
+    <table cellspacing="0" class$="[[isTop(path)]]">
+      <tr class="header-row" on-tap="headerClick">
         <template is="dom-repeat" items="[[keys]]">
           <th>
             [[translate(entityName,item)]]
@@ -91,6 +92,10 @@
           type: Array,
           value: {}
         }
+      },
+      headerClick(e) {
+
+        this.fire('head-click', this.path.length)
       },
       isTop(path) {
         return path.length ? '' : 'top';

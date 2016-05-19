@@ -134,6 +134,10 @@
         overflow-y: scroll;
       }
 
+      #service-picker {
+        overflow: hidden;
+      }
+
       #message {
         display: flex;
         flex-direction: column;
@@ -223,7 +227,8 @@
             <iron-icon id="download" icon="file-download"></iron-icon>
             Скачать
           </paper-button>
-          <report-nested-table hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+
+          <report-nested-table on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
         </paper-material>
       </div>
 
@@ -255,6 +260,15 @@
         document.body.removeChild(link);
       }
 
+      function DeleteTag(string, tag) {
+        let start = new RegExp("\<" + tag + ".+?\>", "g");
+        let end = new RegExp("\</" + tag + "\>", "g");
+        let temp = string.replace(start, '');
+        temp = temp.replace(end, '');
+
+        return temp;
+      }
+
       Polymer({
         is: 'iris-report-hub',
         observers: ['_pChange(permissions)'],
@@ -272,7 +286,43 @@
           return _.values(obj)
         },
         download() {
-          dow('table.xls', this.$["report-table"].innerHTML);
+          let table = DeleteTag(DeleteTag(this.$["report-table"].innerHTML, 'report-nested-table'), 'template');
+          let text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>'
+          dow('table.xls', text);
+        },
+        reorderData(e) {
+          let pos = e.detail;
+          //@NOTE: deleting data description
+          _.unset(this.tableData, this.header_labels.join(group_delimiter));
+          //@NOTE: deleting unused label
+          _.pullAt(this.header_labels, pos);
+          let keys = [];
+          let temp_data = _.reduce(this.tableData, (a, entry, group) => {
+            let parts = group.split(group_delimiter);
+            let key = _.pullAt(parts, pos)[0];
+            keys.push(key);
+            let n_g = parts.join(group_delimiter);
+
+            _.forEach(entry, (value, index) => _.set(a, [n_g, index + '--' + key], value))
+            return a;
+          }, {});
+
+          keys = _.sortBy(_.uniq(keys));
+
+          //@NOTE: make labels
+          this.labels = _.reduce(this.labels, (a, label, index) => {
+            _.forEach(keys, key => {
+              a[index + '--' + key] = label + ' :: ' + this.$['report-table'].translate(this.selectedTemplate.entity, key);
+            });
+            return a;
+          }, {});
+
+          let map = this.makeDataMap(this.header_labels, temp_data);
+          let rows = _.keys(this.labels);
+
+          this.describeData(this.header_labels, this.labels, temp_data);
+          this.initTable(temp_data, rows, map);
+
         },
         ready() {
           this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Услуги', 'Результат'];
@@ -320,8 +370,6 @@
         finalStep() {
           this.flushTable();
 
-          console.log('request server');
-
           let interval = [this.startDate, this.endDate];
           let template = _.cloneDeep(this.selectedTemplate);
 
@@ -335,32 +383,39 @@
           }
 
           let label_path = _.map(template.group, 'method');
-          let header_labels = _.isEmpty(this.captions) ? ['Параметры'] : this.captions;
           let labels = _.map(template.params, 'label');
+          this.labels = labels;
+          this.header_labels = _.isEmpty(this.captions) ? ['Параметры'] : _.cloneDeep(this.captions);
 
 
           this.$.reporter.getTable({
             table: template
           }).then((data) => {
             console.log('response', data);
-            let keys = _.sortBy(_.keys(data));
-            //@NOTE: add row labels to data
-            //@NOTE: path is translated string
-            _.set(data, header_labels.join(group_delimiter), labels);
-
-            let map = _.setWith({}, header_labels, true, Object);
-
-            _.forEach(keys, key => {
-              let parts = key.split(group_delimiter);
-              _.setWith(map, parts, true, Object);
-            });
-
+            let map = this.makeDataMap(this.header_labels, data);
             let rows = _.keys(template.params);
 
+            this.describeData(this.header_labels, labels, data);
             this.initTable(data, rows, map);
           }).catch((e) => {
             console.log('bad news:', e);
           });
+        },
+        describeData(header_labels, labels, data) {
+          //@NOTE: add row labels to data
+          //@NOTE: path is translated string
+          _.set(data, header_labels.join(group_delimiter), labels);
+        },
+        makeDataMap(header_labels, data) {
+          let keys = _.sortBy(_.keys(data));
+          let map = _.setWith({}, header_labels, true, Object);
+
+          _.forEach(keys, key => {
+            let parts = key.split(group_delimiter);
+            _.setWith(map, parts, true, Object);
+          });
+
+          return map;
         },
         nextPage() {
           this.states[this.selectedPage] = true;
