@@ -1,4 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-icons/communication-icons.html">
+
 <link rel="import" href="iris-report-translation-behavior.html">
 
 <dom-module id="report-nested-table">
@@ -17,6 +20,14 @@
       th {
         border: 1px solid var(--nested-table-border-color);
         padding: 5px 10px;
+        height: 30px;
+      }
+
+      th > paper-icon-button {
+        float: right;
+        height: 40px;
+        width: 40px;
+        margin: -8px;
       }
 
       table {
@@ -34,17 +45,16 @@
       .data-cell {
         border: 1px solid var(--nested-table-border-color);
       }
-
-      tr.header-row:hover th {
-        border-color: red;
-      }
     </style>
 
     <table cellspacing="0" class$="[[isTop(path)]]">
-      <tr class="header-row" on-tap="headerClick">
+      <tr class="header-row">
         <template is="dom-repeat" items="[[keys]]">
           <th>
             [[translate(entityName,item)]]
+            <template is="dom-if" if="[[isCaption(item)]]">
+              <paper-icon-button on-tap="headerClick" icon="communication:business"></paper-icon-button>
+            </template>
           </th>
         </template>
       </tr>
@@ -92,6 +102,9 @@
           type: Array,
           value: {}
         }
+      },
+      isCaption(item) {
+        return !~item.indexOf('--');
       },
       headerClick(e) {
 

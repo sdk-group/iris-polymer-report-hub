@@ -22,6 +22,7 @@
 <link rel="import" href="iris-time-picker.html">
 <link rel="import" href="report-nested-table.html">
 <link rel="import" href="report-group-maker.html">
+<link rel="import" href="report-history.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -168,6 +169,7 @@
     <iris-workstation id="reporter"></iris-workstation>
     <iris-currentuser id="user" permissions="{{permissions}}"></iris-currentuser>
     <iris-shared-entities id="shared" namespace="services" key="ALL" value="{{services}}"></iris-shared-entities>
+    <report-history id="history" is-start="{{isStart}}" is-end="{{isEnd}}"></report-history>
 
     <paper-material id="stepper" elevation="1">
       <iris-stepper steps="[[steps]]" states="{{states}}" selected="{{selectedPage}}"></iris-stepper>
@@ -223,10 +225,14 @@
             <paper-spinner active id="spinner"></paper-spinner>
             Обработка
           </div>
-          <paper-button hidden$="[[tableLoading]]" on-tap="download">
-            <iron-icon id="download" icon="file-download"></iron-icon>
-            Скачать
-          </paper-button>
+          <div hidden$="[[tableLoading]]">
+            <paper-icon-button icon="undo" on-tap="historyUndo" disabled$="[[isStart]]"></paper-icon-button>
+            <paper-icon-button icon="redo" on-tap="historyRedo" disabled$="[[isEnd]]"></paper-icon-button>
+            <paper-button on-tap="download">
+              <iron-icon id="download" icon="file-download"></iron-icon>
+              Скачать
+            </paper-button>
+          </div>
 
           <report-nested-table on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
         </paper-material>
@@ -243,6 +249,8 @@
     (function() {
       'use strict'
       const group_delimiter = '::';
+      let history = {};
+      let history_cursor = {};
 
       function dow(filename, text) {
         // Set up the link
@@ -285,6 +293,25 @@
         _toArray(obj) {
           return _.values(obj)
         },
+        restore(history_entry) {
+          console.log('history', history_entry);
+          this.set('labels', history_entry.labels);
+          this.set('header_labels', history_entry.header_labels);
+
+          let map = this.makeDataMap(history_entry.data);
+          let rows = _.keys(this.labels);
+
+          this.describeData(history_entry.data);
+          this.initTable(history_entry.data, rows, map);
+        },
+        historyUndo() {
+          let r = this.$.history.undo();
+          this.restore(r)
+        },
+        historyRedo() {
+          let r = this.$.history.redo();
+          this.restore(r)
+        },
         download() {
           let table = DeleteTag(DeleteTag(this.$["report-table"].innerHTML, 'report-nested-table'), 'template');
           let text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>'
@@ -317,12 +344,17 @@
             return a;
           }, {});
 
-          let map = this.makeDataMap(this.header_labels, temp_data);
+          let map = this.makeDataMap(temp_data);
           let rows = _.keys(this.labels);
 
-          this.describeData(this.header_labels, this.labels, temp_data);
+          this.describeData(temp_data);
           this.initTable(temp_data, rows, map);
 
+          this.$.history.add({
+            labels: _.cloneDeep(this.labels),
+            header_labels: _.cloneDeep(this.header_labels),
+            data: _.cloneDeep(temp_data)
+          });
         },
         ready() {
           this.steps = ['Шаблон отчета', 'Группировка', 'Офис', 'Временной интервал', 'Услуги', 'Результат'];
@@ -377,38 +409,44 @@
           template.interval = interval;
           template.group = this.groups;
 
+          //@NOTE: build service filter
           if (this.selectedServices.length && this.selectedServices.length != _.size(this.services)) {
             let condition = "service in " + this.selectedServices.join(',');
             _.forEach(template.params, param => param.filter.push(condition));
           }
 
-          let label_path = _.map(template.group, 'method');
-          let labels = _.map(template.params, 'label');
-          this.labels = labels;
-          this.header_labels = _.isEmpty(this.captions) ? ['Параметры'] : _.cloneDeep(this.captions);
-
 
           this.$.reporter.getTable({
             table: template
           }).then((data) => {
+            this.$.history.clear();
             console.log('response', data);
-            let map = this.makeDataMap(this.header_labels, data);
-            let rows = _.keys(template.params);
+            this.labels = _.map(template.params, 'label');
+            this.header_labels = _.isEmpty(this.captions) ? ['Параметры'] : _.cloneDeep(this.captions);
 
-            this.describeData(this.header_labels, labels, data);
+            let map = this.makeDataMap(data);
+            let rows = _.keys(this.labels);
+
+            this.describeData(data);
             this.initTable(data, rows, map);
+
+            this.$.history.add({
+              labels: _.cloneDeep(this.labels),
+              header_labels: _.cloneDeep(this.header_labels),
+              data: _.cloneDeep(data)
+            });
           }).catch((e) => {
             console.log('bad news:', e);
           });
         },
-        describeData(header_labels, labels, data) {
+        describeData(data) {
           //@NOTE: add row labels to data
           //@NOTE: path is translated string
-          _.set(data, header_labels.join(group_delimiter), labels);
+          _.set(data, this.header_labels.join(group_delimiter), this.labels);
         },
-        makeDataMap(header_labels, data) {
+        makeDataMap(data) {
           let keys = _.sortBy(_.keys(data));
-          let map = _.setWith({}, header_labels, true, Object);
+          let map = _.setWith({}, this.header_labels, true, Object);
 
           _.forEach(keys, key => {
             let parts = key.split(group_delimiter);

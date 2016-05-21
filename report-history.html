@@ -1,0 +1,53 @@
+<link rel="import" href="../polymer/polymer.html">
+
+
+
+<script>
+  Polymer({
+    is: 'report-history',
+    properties: {
+      isStart: {
+        type: Boolean,
+        notify: true
+      },
+      isEnd: {
+        type: Boolean,
+        notify: true,
+        value: false
+      },
+      value: {
+        type: Object,
+        notify: true,
+        value: false
+      }
+    },
+    ready() {
+      this.clear();
+    },
+    undo() {
+      this.cursor--;
+      this.set('isStart', this.cursor == 0);
+      this.set('isEnd', false);
+      return _.cloneDeep(this.storage[this.cursor])
+    },
+    redo() {
+      this.cursor++;
+      this.set('isEnd', this.cursor == _.size(this.storage) - 1);
+      this.set('isStart', this.cursor == 0);
+      return _.cloneDeep(this.storage[this.cursor])
+    },
+    clear() {
+      this.storage = [];
+      this.cursor = -1;
+      this.set('isEnd', true);
+      this.set('isStart', true);
+    },
+    add(value) {
+      this.cursor++;
+      this.storage[this.cursor] = value;
+      this.storage.length = this.cursor + 1;
+      this.set('isEnd', true);
+      this.set('isStart', this.cursor == 0);
+    }
+  });
+</script>
