@@ -164,9 +164,14 @@
         padding: 0;
         margin: 0;
       }
+
+      #table-actions {
+        padding: 0 5px;
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
+
     <iris-currentuser id="user" permissions="{{permissions}}"></iris-currentuser>
     <iris-shared-entities id="shared" namespace="services" key="ALL" value="{{services}}"></iris-shared-entities>
     <report-history id="history" is-start="{{isStart}}" is-end="{{isEnd}}"></report-history>
@@ -225,7 +230,7 @@
             <paper-spinner active id="spinner"></paper-spinner>
             Обработка
           </div>
-          <div hidden$="[[tableLoading]]">
+          <div id="table-actions" hidden$="[[tableLoading]]">
             <paper-icon-button icon="undo" on-tap="historyUndo" disabled$="[[isStart]]"></paper-icon-button>
             <paper-icon-button icon="redo" on-tap="historyRedo" disabled$="[[isEnd]]"></paper-icon-button>
             <paper-button on-tap="download">
@@ -248,12 +253,13 @@
   <script>
     (function() {
       'use strict'
+
       const group_delimiter = '::';
+
       let history = {};
       let history_cursor = {};
 
-      function dow(filename, text) {
-        // Set up the link
+      function makeDownload(filename, text) {
         var link = document.createElement("a");
         link.setAttribute("target", "_blank");
         var blob = new Blob([text], {
@@ -271,10 +277,7 @@
       function DeleteTag(string, tag) {
         let start = new RegExp("\<" + tag + ".+?\>", "g");
         let end = new RegExp("\</" + tag + "\>", "g");
-        let temp = string.replace(start, '');
-        temp = temp.replace(end, '');
-
-        return temp;
+        return string.replace(start, '').replace(end, '');
       }
 
       Polymer({
@@ -305,17 +308,16 @@
           this.initTable(history_entry.data, rows, map);
         },
         historyUndo() {
-          let r = this.$.history.undo();
-          this.restore(r)
+          this.restore(this.$.history.undo())
         },
         historyRedo() {
-          let r = this.$.history.redo();
-          this.restore(r)
+          this.restore(this.$.history.redo())
         },
         download() {
           let table = DeleteTag(DeleteTag(this.$["report-table"].innerHTML, 'report-nested-table'), 'template');
           let text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>'
-          dow('table.xls', text);
+
+          makeDownload('table.xls', text);
         },
         reorderData(e) {
           let pos = e.detail;
@@ -329,7 +331,6 @@
             let key = _.pullAt(parts, pos)[0];
             keys.push(key);
             let n_g = parts.join(group_delimiter);
-
             _.forEach(entry, (value, index) => _.set(a, [n_g, index + '--' + key], value))
             return a;
           }, {});
@@ -415,10 +416,7 @@
             _.forEach(template.params, param => param.filter.push(condition));
           }
 
-
-          this.$.reporter.getTable({
-            table: template
-          }).then((data) => {
+          this.getTable(template).then((data) => {
             this.$.history.clear();
             console.log('response', data);
             this.labels = _.map(template.params, 'label');
@@ -438,6 +436,11 @@
           }).catch((e) => {
             console.log('bad news:', e);
           });
+        },
+        getTable(template) {
+          return this.$.reporter.getTable({
+            table: template
+          })
         },
         describeData(data) {
           //@NOTE: add row labels to data
@@ -478,18 +481,6 @@
             default:
               return false;
           }
-        },
-        getRows(d) {
-          return _.keys(d);
-        },
-        getColls(ri) {
-          return _.keys(this.tableData[ri])
-        },
-        getCell(rowindex, cell) {
-          return _.get(this.tableData, [rowindex, cell]);
-        },
-        translateKey(key) {
-          return parseInt(key.split('::')[2])
         }
       });
     })();
