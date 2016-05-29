@@ -33,112 +33,112 @@
         --paper-spinner-layer-1-color: #C79B65;
         --paper-spinner-layer-2-color: #4a2015;
       }
-
+      
       iron-pages {
         @apply(--layout-vertical);
         @apply(--layout-flex-auto);
         height: 0;
         overflow: auto;
       }
-
+      
       paper-material {
         padding: 20px 10px;
       }
-
+      
       iron-pages paper-material {
         @apply(--layout-vertical);
         @apply(--layout-flex-auto);
       }
-
+      
       iron-pages > div {
         padding: 1px 3px;
         height: 100%;
         @apply(--layout-vertical);
         @apply(--layout-flex-auto);
       }
-
+      
       iris-template-picker {
         @apply(--layout-flex-auto);
       }
-
+      
       #pages {
         margin-top: 20px;
       }
-
+      
       #stepper {
         margin: 0 3px;
         box-shadow: 0 -1px 2px 0 rgba(0, 0, 0, 0.14), 0 -1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
       }
-
+      
       #interval-picker {
         @apply(--layout-vertical);
         @apply(--layout-around-justified);
       }
-
+      
       #calendar-wrapper {
         @apply(--layout-horizontal);
         @apply(--layout-around-justified);
       }
-
+      
       paper-checkbox {
         display: block;
       }
-
+      
       #template-selector paper-material {
         padding: 0;
       }
-
+      
       #action-buttons {
         margin: 0 3px;
         @apply(--layout);
         @apply(--layout-end-justified);
       }
-
+      
       paper-card {
         border-width: 0;
       }
-
+      
       iris-time-picker {
         text-align: center;
       }
-
+      
       #interval-deco {
         @apply(--layout-horizontal);
         @apply(--layout-between-justified);
         @apply(--layout-center);
       }
-
+      
       #interval-deco iron-icon {
         width: 72px;
         height: 72px;
         color: var(--mydoc-beige-800, cornflowerblue);
       }
-
+      
       #table-tab {
         overflow-x: scroll;
         padding: 0;
       }
-
+      
       report-nested-table {
         padding: 10px;
       }
-
+      
       #report-table {
         display: table;
       }
-
+      
       #action-buttons {
         height: 50px;
       }
-
+      
       #service-table-tab {
         overflow-y: scroll;
       }
-
+      
       #service-picker {
         overflow: hidden;
       }
-
+      
       #message {
         display: flex;
         flex-direction: column;
@@ -147,16 +147,16 @@
         flex: 1;
         font-size: 26px;
       }
-
+      
       paper-spinner {
         width: 75px;
         height: 75px;
       }
-
+      
       #download {
         padding: 10px;
       }
-
+      
       #table paper-button {
         width: 150px;
         font-size: 14px;
@@ -164,7 +164,7 @@
         padding: 0;
         margin: 0;
       }
-
+      
       #table-actions {
         padding: 0 5px;
       }
@@ -220,7 +220,7 @@
 
       <div id="service-picker">
         <paper-material id="service-table-tab" elevation="1">
-          <iris-table data="[[_toArray(services)]]" multiselect fields-model='{"label": "Услуга","id":"ID"}' selected="{{selectedServices}}" selection-field="id"></iris-table>
+          <iris-table data="[[_toArray(services)]]" multiselect fields-model='{"label": "Услуга"}' selected="{{selectedServices}}" selection-field="id"></iris-table>
         </paper-material>
       </div>
 

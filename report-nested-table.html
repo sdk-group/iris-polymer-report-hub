@@ -11,46 +11,50 @@
         display: block;
         --nested-table-border-color: #c3c3c3;
       }
-
+      
       td {
         text-align: center;
         padding: 0;
       }
-
+      
       th {
         border: 1px solid var(--nested-table-border-color);
         padding: 5px 10px;
         height: 30px;
       }
-
+      
       th > paper-icon-button {
         float: right;
         height: 40px;
         width: 40px;
         margin: -8px;
       }
-
+      
       table {
         width: 100%;
         white-space: nowrap;
       }
-
+      
       table.top {
         border: 1px solid var(--nested-table-border-color);
       }
       /*.top > tbody > tr:nth-child(2) > td:nth-child(1) th {
         border-left: none;
       }*/
-
+      
       .data-cell {
         border: 1px solid var(--nested-table-border-color);
+      }
+      
+      th.caption {
+        white-space: normal;
       }
     </style>
 
     <table cellspacing="0" class$="[[isTop(path)]]">
       <tr class="header-row">
         <template is="dom-repeat" items="[[keys]]">
-          <th>
+          <th class$="[[markCaption(item)]]">
             [[translate(entityName,item)]]
             <template is="dom-if" if="[[isCaption(item)]]">
               <paper-icon-button on-tap="headerClick" icon="communication:business"></paper-icon-button>
@@ -105,6 +109,10 @@
       },
       isCaption(item) {
         return !~item.indexOf('--');
+      },
+      markCaption(item) {
+        return this.isCaption(item) ? 'caption' : '';
+
       },
       headerClick(e) {
 
