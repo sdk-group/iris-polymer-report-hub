@@ -108,11 +108,10 @@
         }
       },
       isCaption(item) {
-        return !~item.indexOf('--');
+        return !~item.indexOf('--') && item != 'nogroup' && item != 'Параметры';
       },
       markCaption(item) {
         return this.isCaption(item) ? 'caption' : '';
-
       },
       headerClick(e) {
 
