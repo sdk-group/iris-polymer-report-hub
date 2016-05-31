@@ -56,25 +56,25 @@
         <template is="dom-repeat" items="[[keys]]">
           <th class$="[[markCaption(item)]]">
             [[translate(entityName,item)]]
-            <template is="dom-if" if="[[isCaption(item)]]">
+            <template is="dom-if" if="[[isCaption(item, config.data)]]">
               <paper-icon-button on-tap="headerClick" icon="communication:business"></paper-icon-button>
             </template>
           </th>
         </template>
       </tr>
 
-      <template is="dom-if" if="[[hasSubmap(map,keys)]]">
+      <template is="dom-if" if="[[submap]]">
         <tr>
           <template is="dom-repeat" items="[[keys]]">
             <td>
-              <report-nested-table entity-name="[[entityName]]" data="[[data]]" rows="[[rows]]" map="[[getSubMap(map,item)]]" path="[[computePath(item)]]"></report-nested-table>
+              <report-nested-table entity-name="[[entityName]]" config="[[computeConfig(config,item)]]" path="[[computePath(item)]]"></report-nested-table>
             </td>
           </template>
         </tr>
       </template>
 
-      <template is="dom-if" if="[[!hasSubmap(map,keys)]]">
-        <template is="dom-repeat" items="[[rows]]" as="row">
+      <template is="dom-if" if="[[!submap]]">
+        <template is="dom-repeat" items="[[config.rows]]" as="row">
           <tr>
             <template is="dom-repeat" items="[[keys]]">
               <td class="data-cell">
@@ -92,11 +92,17 @@
       behaviors: [window.IrisBehaviors.TranslationBehvior],
       properties: {
         entityName: String,
-        data: Object,
-        map: Object,
+
+        config: {
+          type: Object
+        },
         keys: {
           type: Array,
-          computed: '_getKeys(map)'
+          computed: '_getKeys(config.map)'
+        },
+        submap: {
+          type: Boolean,
+          computed: 'hasSubmap(keys,config.map)'
         },
         path: {
           type: Array,
@@ -108,13 +114,12 @@
         }
       },
       isCaption(item) {
-        return !~item.indexOf('--') && item != 'nogroup' && item != 'Параметры';
+        return !~item.indexOf('--') && !(this.path.length == 0 && !this.submap);
       },
       markCaption(item) {
-        return this.isCaption(item) ? 'caption' : '';
+        return !~item.indexOf('--') ? 'caption' : '';
       },
       headerClick(e) {
-
         this.fire('head-click', this.path.length)
       },
       isTop(path) {
@@ -129,12 +134,19 @@
       getSubMap(map, item) {
         return map[item];
       },
-      hasSubmap(map, keys) {
-        return _.isObject(map[keys[0]])
+      hasSubmap(keys) {
+        return _.isObject(this.config.map[keys[0]])
+      },
+      computeConfig(config, item) {
+        return {
+          data: config.data,
+          rows: config.rows,
+          map: this.getSubMap(config.map, item)
+        }
       },
       getData(row, item) {
         let key = this.path.length ? this.path.join('::') + '::' + item : item;
-        let data = _.get(this.data, [key, row]);
+        let data = _.get(this.config.data, [key, row]);
         return data === undefined ? '-' : data;
       }
     });

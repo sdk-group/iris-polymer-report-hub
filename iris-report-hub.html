@@ -172,6 +172,10 @@
       #table-actions {
         padding: 0 5px;
       }
+      
+      #service-table-tab iris-table {
+        overflow: visible;
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -243,7 +247,7 @@
             </paper-button>
           </div>
 
-          <report-nested-table on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+          <report-nested-table on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" config="[[tableConfig]]"></report-nested-table>
         </paper-material>
       </div>
 
@@ -301,7 +305,6 @@
           return _.values(obj)
         },
         restore(history_entry) {
-          console.log('history', history_entry);
           this.set('labels', history_entry.labels);
           this.set('header_labels', history_entry.header_labels);
 
@@ -400,6 +403,13 @@
         },
         initTable(data, rows, map) {
           this.tableLoading = !(data && rows && map);
+          if (this.tableLoading) return;
+          this.set('tableConfig', {
+            data: data,
+            rows: rows,
+            map: map
+          });
+
           this.set('tableData', data);
           this.set('rows', rows);
           this.set('tableMap', map);
