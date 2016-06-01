@@ -56,7 +56,7 @@
         <template is="dom-repeat" items="[[keys]]">
           <th class$="[[markCaption(item)]]">
             [[translate(entityName,item)]]
-            <template is="dom-if" if="[[isCaption(item)]]">
+            <template is="dom-if" if="[[isCaption(item,map)]]">
               <paper-icon-button on-tap="headerClick" icon="communication:business"></paper-icon-button>
             </template>
           </th>
@@ -108,10 +108,10 @@
         }
       },
       isCaption(item) {
-        return !~item.indexOf('--') && item != 'nogroup' && item != 'Параметры';
+        return !~item.indexOf('--') && (this.hasSubmap(this.map, [item]) || this.path.length);
       },
       markCaption(item) {
-        return this.isCaption(item) ? 'caption' : '';
+        return !~item.indexOf('--') ? 'caption' : '';
       },
       headerClick(e) {
 

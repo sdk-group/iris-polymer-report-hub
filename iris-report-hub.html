@@ -172,6 +172,10 @@
       #table-actions {
         padding: 0 5px;
       }
+      
+      #service-table-tab iris-table {
+        overflow: visible;
+      }
     </style>
 
     <iris-workstation id="reporter"></iris-workstation>
@@ -382,7 +386,6 @@
         previousPage() {
           this.selectedPage -= 1;
         },
-
         computeOffices(permissions) {
           if (permissions["can-report"]) {
             return _.reduce(permissions["can-report"], (a, label, office) => {
@@ -400,6 +403,8 @@
         },
         initTable(data, rows, map) {
           this.tableLoading = !(data && rows && map);
+          if (this.tableLoading) return;
+
           this.set('tableData', data);
           this.set('rows', rows);
           this.set('tableMap', map);
