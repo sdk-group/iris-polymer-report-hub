@@ -67,6 +67,22 @@
           description: "Все талоны не имевшие состояние «Завершен» на конец дня",
           aggregator: "count",
           filter: ['!hasEventClose']
+        }, {
+          id: "ticket-client-av-waiting-time",
+          label: "Серднее время ожидания",
+          description: "Среднее время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+          aggregator: "averageTime",
+          key: "waitingTime",
+          filter: ['waitingTime > 0'],
+          transform: ['waiting-time']
+        }, {
+          id: "ticket-client-max-waiting-time",
+          label: "Максимальное время ожидания",
+          description: "Максимальное время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+          aggregator: "maxTime",
+          key: "waitingTime",
+          filter: ['waitingTime > 0'],
+          transform: ['waiting-time']
         }]
       }
       // , {
@@ -80,13 +96,11 @@
       // }
     ],
     offices: [{
-        id: 'department-1',
-        label: 'Офис 1'
-      }, {
-        id: 'department-2',
-        label: 'Офис 2'
-      }
-
-    ]
+      id: 'department-1',
+      label: 'Офис 1'
+    }, {
+      id: 'department-2',
+      label: 'Офис 2'
+    }]
   };
 </script>
