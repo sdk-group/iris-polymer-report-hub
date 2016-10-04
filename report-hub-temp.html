@@ -1,106 +1,217 @@
 <script>
   window.ReportHubData = {
-    entities: [{
+    entities: [
+      {
         label: "Талоны",
         entity: "Ticket",
         interval_field: "dedicated_date",
-        templates: [{
-          id: "ticket-booked",
-          label: "Количество забронированных талонов",
-          description: "Все талоны имевшие состояние «Забронирован»",
-          aggregator: "count",
-          filter: ['hasEventBook']
-        }, {
-          id: "ticket-services",
-          label: "Количество забронированных услуг",
-          description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
-          key: "service_count",
-          aggregator: "sum",
-          filter: ['hasEventBook']
-        }, {
-          id: "ticket-unregistered",
-          label: "Количество не активированных броней",
-          description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
-          aggregator: "sum",
-          filter: ['state = expired', '!hasEventActivate']
-        }, {
-          id: "ticket-registered",
-          label: "Количество выданных талонов",
-          description: "Все талоны имевшие состояние «Зарегистрирован»",
-          aggregator: "count",
-          filter: ['hasEventRegister']
-        }, {
-          id: "ticket-requested-services",
-          label: "Количество запрошенных услуг",
-          description: "Количество услуг, содержащихся в «Выданных талонах»",
-          key: "service_count",
-          aggregator: "sum",
-          filter: ['hasEventRegister']
-        }, {
-          id: "ticket-called",
-          label: "Количество вызовов талонов",
-          description: "Все талоны имевшие состояние «Вызван»",
-          aggregator: "count",
-          filter: ['hasEventCall']
-        }, {
-          id: "ticket-processed",
-          label: "Количество обслуженных талонов",
-          description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»",
-          aggregator: "count",
-          filter: ['hasEventClose']
-        }, {
-          id: "ticket-processed-services",
-          label: "Количество предоставленных услуг",
-          description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»",
-          key: "service_count",
-          aggregator: "sum",
-          filter: ['hasEventClose']
-        }, {
-          id: "ticket-client-not-arrived",
-          label: "Количество неподошедших посетителей",
-          description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
-          aggregator: "count",
-          filter: ['state = expired', '!hasEventBook']
-        }, {
-          id: "ticket-client-not-processed",
-          label: "Количество необслуженных посетителей",
-          description: "Все талоны не имевшие состояние «Завершен» на конец дня",
-          aggregator: "count",
-          filter: ['!hasEventClose']
-        }, {
-          id: "ticket-client-av-waiting-time",
-          label: "Среднее время ожидания",
-          description: "Среднее время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
-          aggregator: "averageTime",
-          key: "waitingTime",
-          filter: ['waitingTime > 0'],
-          transform: ['waiting-time']
-        }, {
-          id: "ticket-client-max-waiting-time",
-          label: "Максимальное время ожидания",
-          description: "Максимальное время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
-          aggregator: "maxTime",
-          key: "waitingTime",
-          filter: ['waitingTime > 0'],
-          transform: ['waiting-time']
-        }]
+        templates: [
+          {
+            id: "ticket-booked",
+            label: "Количество забронированных талонов",
+            description: "Все талоны имевшие состояние «Забронирован»",
+            aggregator: "count",
+            filter: ['hasEventBook']
+          }, {
+            id: "ticket-services",
+            label: "Количество забронированных услуг",
+            description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['hasEventBook']
+          }, {
+            id: "ticket-unregistered",
+            label: "Количество не активированных броней",
+            description: "Сумма талонов имевших состояние «Завершен» по событию «Удалена бронь» Системой и талонов, оставшихся в состоянии «Забронирован» на конец дня",
+            aggregator: "sum",
+            filter: ['state = expired', '!hasEventActivate']
+          }, {
+            id: "ticket-registered",
+            label: "Количество выданных талонов",
+            description: "Все талоны имевшие состояние «Зарегистрирован»",
+            aggregator: "count",
+            filter: ['hasEventRegister']
+          }, {
+            id: "ticket-requested-services",
+            label: "Количество запрошенных услуг",
+            description: "Количество услуг, содержащихся в «Выданных талонах»",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['hasEventRegister']
+          }, {
+            id: "ticket-called",
+            label: "Количество вызовов талонов",
+            description: "Все талоны имевшие состояние «Вызван»",
+            aggregator: "count",
+            filter: ['hasEventCall']
+          }, {
+            id: "ticket-processed",
+            label: "Количество обслуженных талонов",
+            description: "Все талоны имевшие состояние «Завершен» по событию «Завершение обслуживания»",
+            aggregator: "count",
+            filter: ['hasEventClose']
+          }, {
+            id: "ticket-processed-services",
+            label: "Количество предоставленных услуг",
+            description: "Сумма услуг/дел талонов имевших состояние «Завершен» по событию «Завершение обслуживания»",
+            key: "service_count",
+            aggregator: "sum",
+            filter: ['hasEventClose']
+          }, {
+            id: "ticket-client-not-arrived",
+            label: "Количество неподошедших посетителей",
+            description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
+            aggregator: "count",
+            filter: ['state = expired', '!hasEventBook']
+          }, {
+            id: "ticket-client-not-processed",
+            label: "Количество необслуженных посетителей",
+            description: "Все талоны не имевшие состояние «Завершен» на конец дня",
+            aggregator: "count",
+            filter: ['!hasEventClose']
+          }, {
+            id: "ticket-client-av-waiting-time",
+            label: "Среднее время ожидания",
+            description: "Среднее время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+            aggregator: "averageTime",
+            key: "waitingTime",
+            filter: ['waitingTime > 0'],
+            transform: ['waiting-time']
+          }, {
+            id: "ticket-client-max-waiting-time",
+            label: "Максимальное время ожидания",
+            description: "Максимальное время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+            aggregator: "maxTime",
+            key: "waitingTime",
+            filter: ['waitingTime > 0'],
+            transform: ['waiting-time']
+          }
+        ]
+      },
+      // , {   label: "Сотрудники",   type: "Employee",   templates: [{     id: "employee-first",     label: "Какой-то отчет по сторудникам ",     description: "Long and cool template description "   }] }
+      {
+        label: "Оценка качества",
+        entity: "Ticket",
+        interval_field: "dedicated_date",
+        templates: [
+          {
+            id: "question-count",
+            label: "Количество выставленных оценок",
+            description: "Количество выставленных оценок",
+            legend: "questions",
+            nested: [
+              {
+                id: "question-0-count",
+                label: "Количество (вопрос 1)",
+                aggregator: "count",
+                key: "question0",
+                filter: [
+                  'question0 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-1-count",
+                label: "Количество (вопрос 2)",
+                aggregator: "count",
+                key: "question1",
+                filter: [
+                  'question1 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-2-count",
+                label: "Количество (вопрос 3)",
+                aggregator: "count",
+                key: "question2",
+                filter: [
+                  'question2 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-3-count",
+                label: "Количество (вопрос 4)",
+                aggregator: "count",
+                key: "question3",
+                filter: [
+                  'question3 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-4-count",
+                label: "Количество (вопрос 5)",
+                aggregator: "count",
+                key: "question4",
+                filter: [
+                  'question4 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }
+            ]
+          }, {
+            id: "question-average",
+            label: "Среднее значение выставленных оценок",
+            description: "Среднее значение выставленных оценок",
+            nested: [
+              {
+                id: "question-0-average",
+                label: "Среднее (вопрос 1)",
+                aggregator: "average",
+                key: "question0",
+                legend: "questions",
+                filter: [
+                  'question0 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-1-average",
+                label: "Среднее (вопрос 2)",
+                aggregator: "average",
+                key: "question1",
+                filter: [
+                  'question1 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-2-average",
+                label: "Среднее (вопрос 3)",
+                aggregator: "average",
+                key: "question2",
+                filter: [
+                  'question2 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-3-average",
+                label: "Среднее (вопрос 4)",
+                aggregator: "average",
+                key: "question3",
+                filter: [
+                  'question3 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }, {
+                id: "question-4-average",
+                label: "Среднее (вопрос 5)",
+                aggregator: "average",
+                key: "question4",
+                filter: [
+                  'question4 > 0', 'hasEventQaCheck'
+                ],
+                transform: ['answers']
+              }
+            ]
+          }
+        ]
       }
-      // , {
-      //   label: "Сотрудники",
-      //   type: "Employee",
-      //   templates: [{
-      //     id: "employee-first",
-      //     label: "Какой-то отчет по сторудникам ",
-      //     description: "Long and cool template description "
-      //   }]
-      // }
     ],
-    offices: [{
-      id: 'department-1',
-      label: 'Офис 1'
-    }, {
-      id: 'department-2',
-      label: 'Офис 2'
-    }]
+    offices: [
+      {
+        id: 'department-1',
+        label: 'Офис 1'
+      }, {
+        id: 'department-2',
+        label: 'Офис 2'
+      }
+    ]
   };
 </script>

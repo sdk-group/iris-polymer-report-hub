@@ -9,21 +9,22 @@
       :host {
         @apply(--layout-vertical);
       }
-      
+
       .group-variants {
         padding: 10px;
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
-      
+
       .header {
         width: 150px;
       }
-      
+
       .controls {
         @apply(--layout-vertical);
         @apply(--layout-center);
       }
+
     </style>
 
     <template id="groups" is="dom-repeat" items="[[variants]]" as="group">
@@ -39,7 +40,6 @@
         <iris-button-group selected="{{group.selected}}" selected-index="{{group.index}}" buttons="[[group.content]]" on-tap="selectGroup"></iris-button-group>
       </div>
     </template>
-
 
   </template>
   <script>
@@ -68,8 +68,10 @@
         let temp = _.cloneDeep(this.variants[index - 1]);
 
         let group = _.map(this.variants, (item, counter) => {
-          if (counter == index) return temp;
-          if (counter == index - 1) return this.variants[index];
+          if (counter == index)
+            return temp;
+          if (counter == index - 1)
+            return this.variants[index];
           return item;
         });
         this.variants = group;
@@ -79,96 +81,130 @@
         let index = e.model.index;
         let temp = _.cloneDeep(this.variants[index]);
         let group = _.map(this.variants, (item, counter) => {
-          if (counter == index) return this.variants[counter + 1];
-          if (counter == index + 1) return temp;
+          if (counter == index)
+            return this.variants[counter + 1];
+          if (counter == index + 1)
+            return temp;
           return item;
         });
         this.variants = group;
         this.selectGroup();
       },
       selectGroup() {
-        let result = _.reduce(this.variants, (a, g) => (g.selected !== 'no') ? a.push(g.selected) && a : a, []);
-        let caps = _.reduce(this.variants, (a, g, i) => (g.selected !== 'no') ? a.push(g.content[g.index].label) && a : a, []);
+        let result = _.reduce(this.variants, (a, g) => (g.selected !== 'no')
+          ? a.push(g.selected) && a
+          : a, []);
+        let caps = _.reduce(this.variants, (a, g, i) => (g.selected !== 'no')
+          ? a.push(g.content[g.index].label) && a
+          : a, []);
         this.set('groups', result);
         this.set('captions', caps);
       },
       ready() {
-        this.variants = [{
-          header: "Год",
-          selected: 'no',
-          index: 0,
-          content: [{
-            label: 'Нет',
-            code: 'no'
+        this.variants = [
+          {
+            header: "Год",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: 'Месяцы',
+                code: {
+                  method: 'month',
+                  field: 'dedicated_date'
+                }
+              }
+            ]
           }, {
-            label: 'Месяцы',
-            code: {
-              method: 'month',
-              field: 'dedicated_date'
-            }
-          }]
-        }, {
-          header: "Месяц",
-          selected: 'no',
-          index: 0,
-          content: [{
-            label: 'Нет',
-            code: 'no'
+            header: "Месяц",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: "Дни",
+                code: {
+                  method: 'month-day',
+                  field: 'dedicated_date'
+                }
+              }, {
+                label: "Дни недели",
+                code: {
+                  method: 'week-day',
+                  field: 'dedicated_date'
+                }
+              }
+            ]
           }, {
-            label: "Дни",
-            code: {
-              method: 'month-day',
-              field: 'dedicated_date'
-            }
+            header: "День",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: "1 час",
+                code: {
+                  method: '60minute'
+                }
+              }
+            ]
           }, {
-            label: "Дни недели",
-            code: {
-              method: 'week-day',
-              field: 'dedicated_date'
-            }
-          }]
-        }, {
-          header: "День",
-          selected: 'no',
-          index: 0,
-          content: [{
-            label: 'Нет',
-            code: 'no'
+            header: "Дополнительно",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: "Офис",
+                code: {
+                  method: 'enum',
+                  field: 'org_destination'
+                }
+              }
+            ]
           }, {
-            label: "1 час",
-            code: {
-              method: '60minute'
-            }
-          }]
-        }, {
-          header: "Дополнительно",
-          selected: 'no',
-          index: 0,
-          content: [{
-            label: 'Нет',
-            code: 'no'
+            header: "Услуга",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: "Услуга",
+                code: {
+                  method: 'enum',
+                  field: 'service'
+                }
+              }
+            ]
           }, {
-            label: "Офис",
-            code: {
-              method: 'enum',
-              field: 'org_destination'
-            }
-          }]
-        }, {
-          header: "Услуга",
-          selected: 'no',
-          index: 0,
-          content: [{
-            label: 'Нет',
-            code: 'no'
-          }, {
-            label: "Услуга",
-            code: {
-              method: 'enum',
-              field: 'service'
-            }
-          }]
-        }];
+            header: "Оператор",
+            selected: 'no',
+            index: 0,
+            content: [
+              {
+                label: 'Нет',
+                code: 'no'
+              }, {
+                label: "Оператор",
+                code: {
+                  method: 'enum',
+                  field: 'operator'
+                }
+              }
+            ]
+          }
+        ];
 
       }
     });

@@ -1,0 +1,40 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="report-legend">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      span.title {
+        padding-right: 10px;
+      }
+
+    </style>
+    <iris-shared-entities id="questions" namespace="questions" key="ALL" value="{{questions}}"></iris-shared-entities>
+    <template is="dom-repeat" items="[[getLegend(key)]]">
+      <paper-item>
+        <span class="title">Вопрос [[makeIndex(index)]].</span>
+        <span>[[item]]</span>
+      </paper-item>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'report-legend',
+      properties: {
+        key: {
+          type: String
+        }
+      },
+      getLegend(key) {
+        if (!~ key.indexOf("questions"))
+          return [];
+        return _.chain(this.questions).orderBy('code').map('description').value();
+      },
+      makeIndex(index) {
+        return index + 1;
+      }
+    });
+  </script>
+</dom-module>

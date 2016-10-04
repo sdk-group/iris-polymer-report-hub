@@ -98,12 +98,23 @@
       observers: ['_computeTemplate(entities,selectedItems.length)'],
       _computeTemplate() {
         let params = [];
+        let legend = [];
         _.forEach(this.selectedItems, item => {
-          params.push(_.clone(item))
+          (!!item.legend) && legend.push(item.legend);
+
+          if (_.isArray(item.nested)) {
+
+            _.forEach(item.nested, subparam => {
+              params.push(_.clone(subparam));
+            });
+          } else {
+            params.push(_.clone(item))
+          }
         });
         let desc = this.entities[this.entityTab];
         let template = {
           entity: desc.entity,
+          legend: _.uniq(legend),
           interval_field: desc.interval_field,
           params: params
         };
