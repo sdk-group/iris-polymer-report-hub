@@ -30,7 +30,11 @@
       getLegend(key) {
         if (!~ key.indexOf("questions"))
           return [];
-        return _.chain(this.questions).orderBy('code').map('description').value();
+        console.log(this.questions);
+        return _.chain(this.questions).sortBy([function (o) {
+            return parseInt(o.code);
+          }
+        ]).map('description').value();
       },
       makeIndex(index) {
         return index + 1;
