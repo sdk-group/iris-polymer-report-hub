@@ -1,0 +1,48 @@
+<dom-module id="report-history-filter-maker">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+    </style>
+    <iris-table id="namesTable" fields-model="[[model]]" data="[[list]]" multiselect selected="{{selectedNames}}" selection-field="key"></iris-table>
+  </template>
+  <script>
+    Polymer({
+      is: 'report-history-filter-maker',
+      behaviors: [window.IrisBehaviors.TicketHistoryBehavior],
+      properties: {
+        selectedNames: {
+          type: Array,
+          value: []
+        },
+        filter: {
+          type: Array,
+          notify: true,
+          computed: "_selectionChanged(selectedNames.splices)"
+        }
+      },
+      _selectionChanged() {
+        if ((this.selectedNames || []).length == (this.list || []).length)
+          return undefined;
+        let names = (this.selectedNames || []).join(',');
+
+        return names
+          ? `event_name in ${names}`
+          : undefined;
+      },
+      ready() {
+        let translation = this._getTranslationMap();
+        this.set('list', _.map(translation, (item, key) => ({item, key})));
+        this.model = [
+          {
+            label: 'Состояние',
+            field: "item",
+            transform: (item) => _.capitalize(item)
+          }
+        ];
+      }
+    });
+  </script>
+</dom-module>

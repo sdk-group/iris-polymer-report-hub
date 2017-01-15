@@ -1,0 +1,31 @@
+<dom-module id="iris-collection-register">
+  <template></template>
+  <script>
+    Polymer({
+      is: 'iris-collection-register',
+      properties: {
+        name: {
+          type: String,
+          observer: '_nameChanged'
+        },
+        collection: {
+          type: String,
+          value: "default"
+        }
+      },
+      attached() {
+        this.style.display = 'none';
+      },
+      getTemplate() {
+        this.template = this.template || this._createTemplate();
+        return this.template;
+      },
+      _nameChanged() {
+        new Polymer.IronMeta({type: `iris-${this.collection}-stamps`, key: this.name, value: this});
+      },
+      _createTemplate() {
+        return Polymer.dom(this).querySelector('template');
+      }
+    })
+  </script>
+</dom-module>

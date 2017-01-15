@@ -1,0 +1,33 @@
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="./iris-stamp-behavior.html">
+
+<dom-module id="report-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+    </style>
+    <div id="stamp"></div>
+  </template>
+  <script>
+    Polymer({
+      is: 'report-item',
+      behaviors: [window.IrisBehaviors.StampBehavior],
+      properties: {
+        collection: {
+          type: String,
+          value: 'report-template'
+        },
+        template: {
+          type: String
+        },
+        data: {
+          type: Object,
+          notify: true
+        }
+      }
+    });
+  </script>
+</dom-module>

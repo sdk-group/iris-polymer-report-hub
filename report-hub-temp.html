@@ -15,7 +15,7 @@
           }, {
             id: "ticket-services",
             label: "Количество забронированных услуг",
-            description: "Количество услуг, содержащихся в «Зарегистрированных талонах»",
+            description: "Количество услуг, содержащихся в «Забронированных талонах»",
             key: "service_count",
             aggregator: "sum",
             filter: ['hasEventBook']
@@ -85,19 +85,35 @@
           }, {
             id: "ticket-client-av-waiting-time",
             label: "Среднее время ожидания",
-            description: "Среднее время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+            description: "Среднее время ожидания посетителя между событиями «Зарегистрирован» или «Активирован» и «Вызван»",
             aggregator: "averageTime",
             key: "waitingTime",
-            filter: ['waitingTime > 0'],
+            filter: ['waitingTime >= 0'],
             transform: ['waiting-time']
           }, {
             id: "ticket-client-max-waiting-time",
             label: "Максимальное время ожидания",
-            description: "Максимальное время ожидания посетителя между событиями «Зарегистрирован» или Активирован» и «Завершен»",
+            description: "Максимальное время ожидания посетителя между событиями «Зарегистрирован» или «Активирован» и «Вызван»",
             aggregator: "maxTime",
             key: "waitingTime",
-            filter: ['waitingTime > 0'],
+            filter: ['waitingTime >= 0'],
             transform: ['waiting-time']
+          }, {
+            id: "ticket-client-max-process-time",
+            label: "Максимальное время обслуживания",
+            description: "Максимальное время обслуживания посетителя между событиями «Подошел» и «Закрыт»",
+            aggregator: "maxTime",
+            key: "processTime",
+            filter: ['processTime >= 0'],
+            transform: ['process-time']
+          }, {
+            id: "ticket-client-av-process-time",
+            label: "Среднее время обслуживания",
+            description: "Среднее время обслуживания посетителя между событиями «Подошел» и «Закрыт»",
+            aggregator: "averageTime",
+            key: "processTime",
+            filter: ['processTime >= 0'],
+            transform: ['process-time']
           }
         ]
       },
@@ -213,6 +229,82 @@
                 transform: ['answers']
               }
             ]
+          }
+        ]
+      }, {
+        label: "События талонов",
+        entity: "History",
+        interval_field: "dedicated_date",
+        table_type: "classic",
+        transform(data) {
+          return _.head(data.nogroup).meta;
+        },
+        fieldsModel: [
+          {
+            'label': 'Пин',
+            'field': 'code'
+          }, {
+            'label': 'Номер талона',
+            'field': 'label'
+          }, {
+            'label': 'Событие',
+            'field': 'event_name',
+            'transform': function (name) {
+              return (this._translateEvent(name, true) || '');
+            }
+          }, {
+            'label': 'Дата',
+            'field': 'local_time',
+            'transform': function (time) {
+              return moment(time).format('YYYY MM DD')
+            }
+          }, {
+            'label': 'Время',
+            'field': 'local_time',
+            'transform': function (time) {
+              return moment(time).format('HH:mm');
+            }
+          }, {
+            'label': 'Услуга',
+            'field': 'service',
+            'transform': function (service) {
+              return (this.$.services.get(service) || {}).label;
+            }
+          }, {
+            'label': 'Окно',
+            'field': 'context',
+            'transform': function (context) {
+              if (!(context || {}).workstation)
+                return;
+
+              return (this.$.workstations.get(context.workstation) || {}).label;
+            }
+          }, {
+            'label': 'Сотрудник',
+            'field': 'subject',
+            'transform': function (context) {
+              if (!(context || {}).id)
+                return;
+              if (context.type != "operator")
+                return;
+              let oper = (this.$.operators.get(context.id) || {});
+              return `${oper.first_name} ${oper.last_name} ${oper.middle_name}`;
+            }
+          }, {
+            'label': "Пачка",
+            'field': "session",
+            'transform': (session) => session && _.last(session.split('--')) || ''
+          }
+
+        ],
+        templates: [
+          {
+            id: "history-event",
+            label: "Журнал талонов",
+            aggregator: "count",
+            description: "Список событий талонов за выбранный период времени",
+            template: "ticket-history",
+            meta: "all"
           }
         ]
       }

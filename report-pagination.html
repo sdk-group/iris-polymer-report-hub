@@ -1,0 +1,82 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-slider/paper-slider.html">
+
+<dom-module id="report-pagination">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --paper-slider-height: 4px;
+        --paper-slider-knob-color: var(--mydoc-brown-800);
+        --paper-slider-knob-start-color: var(--mydoc-brown-800);
+        --paper-slider-pin-color: var(--mydoc-brown-800);
+        --paper-slider-pin-start-color: var(--mydoc-brown-800);
+        --paper-slider-active-color: var(--mydoc-beige-800);
+      }
+      paper-slider {
+        width: 100%;
+        height: 90px;
+      }
+
+    </style>
+    <!-- <template is="dom-repeat" items="[[pageNumbers]]">
+      <paper-button raised on-tap="selectPage">[[item.number]]</paper-button>
+    </template> -->
+    <template is="dom-if" if="[[hasPages([pageNumbers.length)]]">
+      <paper-slider id="ratings" pin snaps max="[[pageNumbers.length]]" min="1" max-markers="100" step="1" value="{{pageIndex}}"></paper-slider>
+    </template>
+  </template>
+  <script>
+    Polymer({
+      is: 'report-pagination',
+      properties: {
+        data: {
+          type: Array
+        },
+        page: {
+          type: Array,
+          computed: "_getPage(pageIndex,data, itemsPerPage)",
+          notify: true
+        },
+        pageIndex: {
+          type: Number,
+          value: 1
+        },
+        itemsPerPage: {
+          type: Number,
+          value: 100
+        },
+        pageNumbers: {
+          type: Array,
+          computed: "_getPageNumbers(pageIndex,data, itemsPerPage)"
+        }
+      },
+      next() {
+        this.set('pageIndex', this.pageIndex + 1);
+      },
+      hasPages(c) {
+        return c > 1;
+      },
+      previous() {
+        this.set('pageIndex', this.pageIndex - 1);
+      },
+      _getPage(page, data) {
+        let begin = (page - 1) * this.itemsPerPage;
+        let end = begin + this.itemsPerPage;
+        return this.data.slice(begin, end);
+      },
+      _getPageNumbers(page, data, ipp) {
+        let count = _.ceil(data.length / ipp);
+        let range = _.range(1, count + 1);
+        return _.map(range, number => ({
+          number,
+          selected: number == page
+        }));
+      },
+      selectPage(e) {
+        let index = e.model.index + 1;
+        this.set('pageIndex', index);
+      }
+    });
+  </script>
+</dom-module>

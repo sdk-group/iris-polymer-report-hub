@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../iris-polymer-ticket-lifeline/iris-ticket-history-behavior.html">
 
 <dom-module id="iris-template-picker">
   <template>
@@ -60,6 +61,11 @@
       }
 
     </style>
+
+    <iris-shared-entities id="services" namespace="services" key="ALL"></iris-shared-entities>
+    <iris-shared-entities id="workstations" namespace="workstations" key="ALL"></iris-shared-entities>
+    <iris-shared-entities id="operators" namespace="operators" key="ALL"></iris-shared-entities>
+
     <paper-tabs selected="{{entityTab}}">
       <template is="dom-repeat" items="[[entities]]">
         <paper-tab>[[item.label]]</paper-tab>
@@ -78,6 +84,7 @@
   <script>
     Polymer({
       is: 'iris-template-picker',
+      behaviors: [window.IrisBehaviors.TicketHistoryBehavior],
       properties: {
         selectedItems: {
           type: Object
@@ -112,10 +119,21 @@
           }
         });
         let desc = this.entities[this.entityTab];
+        let self = this;
         let template = {
           entity: desc.entity,
           legend: _.uniq(legend),
           interval_field: desc.interval_field,
+          transform: desc.transform,
+          fieldsModel: _.map(desc.fieldsModel, item => {
+            if (item.transform && !item.transform.bound) {
+              item.transform = item.transform.bind(self);
+              item.transform.bound = true;
+            }
+
+            return item;
+          }),
+          table_type: desc.table_type || "nested",
           params: params
         };
 

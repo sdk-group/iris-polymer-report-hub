@@ -1,0 +1,11 @@
+<link rel="import" href="iris-collection-register.html">
+
+<iris-collection-register collection='report-template' name="base">
+  <template>
+    <div class="item-wrapper">
+      <paper-card class$="list-item [[isOpened(selected,item)]]" heading="[[value.label]]">
+        <div class="template-description">[[value.description]]</div>
+      </paper-card>
+    </div>
+  </template>
+</iris-collection-register>

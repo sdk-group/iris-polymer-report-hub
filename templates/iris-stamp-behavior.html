@@ -1,0 +1,32 @@
+<script>
+  (function () {
+    'use strict'
+
+    window.IrisBehaviors = window.IrisBehaviors || {};
+
+    IrisBehaviors.StampBehavior = {
+      observers: [
+        '_collectionNameChanged(collection)', '_presentationChanged(template)'
+      ],
+      _collectionNameChanged(collection) {
+        this._meta = Polymer.Base.create('iron-meta', {type: `iris-${collection}-stamps`});
+      },
+      getTemplate(name) {
+        let model = this._meta.byKey(name);
+        let template = model.getTemplate();
+        return template;
+      },
+      _presentationChanged(template) {
+        let template_name = template || 'base';
+
+        // if (this.clone) {   this.clone.value = this.data;   return }
+        let model = this.getTemplate(template_name);
+        this.templatize(model);
+        this.clone = this.stamp({value: this.data});
+
+        Polymer.dom(this.$.stamp).appendChild(this.clone.root);
+      }
+    };
+
+  })();
+</script>

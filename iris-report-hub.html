@@ -21,9 +21,11 @@
 <link rel="import" href="report-hub-temp.html">
 <link rel="import" href="iris-time-picker.html">
 <link rel="import" href="report-nested-table.html">
+<link rel="import" href="report-history-filter-maker.html">
 <link rel="import" href="report-group-maker.html">
 <link rel="import" href="report-history.html">
 <link rel="import" href="report-legend.html">
+<link rel="import" href="report-pagination.html">
 
 <dom-module id="iris-report-hub">
   <template>
@@ -120,6 +122,13 @@
         padding: 0;
       }
 
+      #table-tab.classic {
+        overflow: hidden;
+      }
+      #table-tab.classic iron-pages {
+        overflow: hidden;
+      }
+
       report-nested-table {
         padding: 10px;
       }
@@ -185,6 +194,7 @@
     <iris-currentuser id="user" permissions="{{permissions}}"></iris-currentuser>
     <iris-shared-entities id="shared" namespace="services" key="ALL" value="{{services}}"></iris-shared-entities>
     <iris-shared-entities id="operators" namespace="operators" key="ALL" value="{{operators}}"></iris-shared-entities>
+    <iris-shared-entities id="departments" namespace="departments" key="ALL" value="{{departments}}"></iris-shared-entities>
 
     <report-history id="history" is-start="{{isStart}}" is-end="{{isEnd}}"></report-history>
 
@@ -202,7 +212,11 @@
 
       <div id="group-selector">
         <paper-material elevation="1">
-          <report-group-maker groups="{{groups}}" captions="{{captions}}"></report-group-maker>
+
+          <iron-pages attr-for-selected="type" selected="[[selectedTemplate.table_type]]">
+            <report-group-maker type="nested" groups="{{groups}}" captions="{{captions}}"></report-group-maker>
+            <report-history-filter-maker filter="{{classicFilter}}" type="classic"></report-history-filter-maker>
+          </iron-pages>
         </paper-material>
       </div>
 
@@ -237,7 +251,7 @@
       </div>
 
       <div id="table">
-        <paper-material id="table-tab" elevation="1">
+        <paper-material id="table-tab" elevation="1" class$="[[selectedTemplate.table_type]]">
           <div id="message" hidden$="[[!tableLoading]]">
             <paper-spinner active id="spinner"></paper-spinner>
             Обработка
@@ -250,8 +264,14 @@
               Скачать
             </paper-button>
           </div>
+          <iron-pages attr-for-selected="type" selected="[[selectedTemplate.table_type]]">
+            <report-nested-table type="nested" on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
+            <div type="classic" hidden$="[[tableLoading]]">
+              <report-pagination data="[[classicData]]" page="{{classicPage}}"></report-pagination>
+              <iris-table id="classic-report-table" data="[[classicPage]]" fields-model="[[selectedTemplate.fieldsModel]]"></report-nested-table>
+            </div>
+          </iron-pages>
 
-          <report-nested-table on-head-click="reorderData" hidden$="[[tableLoading]]" id="report-table" entity-name="[[selectedTemplate.entity]]" map="[[tableMap]]" data="[[tableData]]" rows="[[rows]]"></report-nested-table>
           <report-legend key="[[selectedTemplate.legend]]"></report-legend>
         </paper-material>
       </div>
@@ -296,6 +316,10 @@
       Polymer({
         is: 'iris-report-hub',
         observers: ['_pChange(permissions)'],
+        listeners: {
+          'after-logout': 'reset'
+        },
+        reset() {},
         _pChange(permissions) {
           //@NOTE: not so dirty translation hack for oren
           this.$['report-table'].addTranslation('Ticket', 'enum-org_destination', function (d) {
@@ -318,7 +342,8 @@
 
         },
         _toArray(obj) {
-          return _.values(obj)
+          console.log("TO ARRAY", obj);
+          return _.values(obj);
         },
         restore(history_entry) {
           console.log('history', history_entry);
@@ -338,9 +363,36 @@
           this.restore(this.$.history.redo())
         },
         download() {
-          let table = DeleteTag(DeleteTag(this.$["report-table"].innerHTML, 'report-nested-table'), 'template');
-          let text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>'
+          let text;
+          if (this.selectedTemplate.table_type != "classic") {
+            let table = DeleteTag(DeleteTag(this.$["report-table"].innerHTML, 'report-nested-table'), 'template');
+            text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>'
 
+          } else {
+            let table = '<table border="1">';
+
+            let head = "<tr>"
+            _.forEach(this.selectedTemplate.fieldsModel, model => {
+              head += "<th>"
+              head += model.label;
+              head += "</th>"
+            });
+            head += "</tr>";
+            table += head;
+            _.forEach(this.classicData, item => {
+              var row = "<tr>";
+
+              _.forEach(this.selectedTemplate.fieldsModel, model => {
+                let data = this.$["classic-report-table"].getCelldata(model, item) || '';
+                row += "<td>" + data + "</td>";
+              });
+              row += "</tr>";
+              table += row;
+            });
+            table += "</table>";
+
+            text = '<html lang="ru"><head><meta charset="utf-8"></head><body>' + table + '</body></html>';
+          }
           makeDownload('table.xls', text);
         },
         reorderData(e) {
@@ -404,6 +456,7 @@
           this.startDate = false;
           this.endDate = false;
           this.selectedOffices = [];
+          this.selectedServices = [];
         },
         canBack(selectedPage) {
           return !selectedPage;
@@ -412,9 +465,10 @@
           this.selectedPage -= 1;
         },
         computeOffices(permissions) {
+
           if (permissions["can-report"]) {
             return _.reduce(permissions["can-report"], (a, label, office) => {
-              label && a.push({id: office, label: label});
+              label && a.push({id: office, label: this.$.departments.get(office).label});
               return a
             }, [])
           }
@@ -444,17 +498,34 @@
 
           template.department = _.map(this.selectedOffices, 'id');
           template.interval = interval;
-          template.group = this.groups;
+          template.group = template.table_type == 'classic'
+            ? undefined
+            : this.groups;
 
           //@NOTE: build service filter
           if (this.selectedServices.length && this.selectedServices.length != _.size(this.services)) {
             let condition = "service in " + this.selectedServices.join(',');
+            console.log(template.params, condition, this.selectedServices)
             _.forEach(template.params, param => param.filter.push(condition));
+          }
+
+          if (template.table_type == 'classic' && this.classicFilter) {
+            _.forEach(template.params, param => param.filter = !!this.classicFilter
+              ? [this.classicFilter]
+              : undefined);
           }
 
           this.getTable(template).then((data) => {
             this.$.history.clear();
             console.log('response', data);
+            console.log('template', template);
+
+            if (template.transform instanceof Function) {
+              this.set('classicData', template.transform(data));
+              this.tableLoading = false;
+              return;
+            }
+
             this.labels = _.map(template.params, 'label');
             this.header_labels = _.isEmpty(this.captions)
               ? ['Параметры']
@@ -497,10 +568,10 @@
           this.states[this.selectedPage] = true;
           this.selectedPage += 1;
 
-          if ((this.selectedPage + 1) == this.steps.length)
+          if ((this.selectedPage + 1) == this.steps.length) {
             this.finalStep();
           }
-        ,
+        },
         canNext(page, template_id, length, startDate, endDate, groups, selectedServices) {
           switch (page) {
             case 0:
