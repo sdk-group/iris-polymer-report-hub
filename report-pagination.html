@@ -66,6 +66,9 @@
         return this.data.slice(begin, end);
       },
       _getPageNumbers(page, data, ipp) {
+        if (!data.length)
+          return [];
+
         let count = _.ceil(data.length / ipp);
         let range = _.range(1, count + 1);
         return _.map(range, number => ({

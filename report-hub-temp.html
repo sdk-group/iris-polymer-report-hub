@@ -237,7 +237,8 @@
         interval_field: "dedicated_date",
         table_type: "classic",
         transform(data) {
-          return _.head(data.nogroup).meta;
+          console.log(_.get(data, ['nogroup', 0, 'meta']));
+          return _.get(data, ['nogroup', 0, 'meta']) || [];
         },
         fieldsModel: [
           {

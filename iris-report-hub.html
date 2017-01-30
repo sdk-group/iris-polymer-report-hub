@@ -506,7 +506,7 @@
           if (this.selectedServices.length && this.selectedServices.length != _.size(this.services)) {
             let condition = "service in " + this.selectedServices.join(',');
             console.log(template.params, condition, this.selectedServices)
-            _.forEach(template.params, param => param.filter.push(condition));
+            _.forEach(template.params, param => (param.filter || (param.filter = [])).push(condition));
           }
 
           if (template.table_type == 'classic' && this.classicFilter) {
