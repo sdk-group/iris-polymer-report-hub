@@ -40,10 +40,16 @@
             filter: ['state = expired', '!hasEventActivate']
           }, {
             id: "ticket-registered",
-            label: "Количество выданных талонов",
+            label: "Количество зарегистрированных талонов",
             description: "Все талоны имевшие состояние «Зарегистрирован»",
             aggregator: "count",
             filter: ['hasEventRegister']
+          }, {
+            id: "ticket-registered-by-pin-code",
+            label: "Количество зарегистрированных по пин-коду талонов",
+            description: "Все талоны имевшие состояние «Зарегистрирован»",
+            aggregator: "count",
+            filter: ['hasEventActivate']
           }, {
             id: "ticket-requested-services",
             label: "Количество запрошенных услуг",
@@ -75,7 +81,7 @@
             label: "Количество неподошедших посетителей",
             description: "Все талоны имевшие состояние «Завершен» по событию «Талон просрочен»",
             aggregator: "count",
-            filter: ['state = expired', '!hasEventBook']
+            filter: ['state = expired', '!hasEventBook OR hasEventActivate']
           }, {
             id: "ticket-client-not-processed",
             label: "Количество необслуженных посетителей",
@@ -236,10 +242,7 @@
         entity: "History",
         interval_field: "dedicated_date",
         table_type: "classic",
-        transform(data) {
-          console.log(_.get(data, ['nogroup', 0, 'meta']));
-          return _.get(data, ['nogroup', 0, 'meta']) || [];
-        },
+        transform: (data) => _.get(data, ['nogroup', 0, 'meta']) || [],
         fieldsModel: [
           {
             'label': 'Пин',
@@ -257,13 +260,13 @@
             'label': 'Дата',
             'field': 'local_time',
             'transform': function (time) {
-              return moment(time).format('YYYY MM DD')
+              return moment.parseZone(time).format('YYYY MM DD')
             }
           }, {
             'label': 'Время',
             'field': 'local_time',
             'transform': function (time) {
-              return moment(time).format('HH:mm');
+              return moment.parseZone(time).format('HH:mm');
             }
           }, {
             'label': 'Услуга',
@@ -295,6 +298,20 @@
             'label': "Пачка",
             'field': "session",
             'transform': (session) => session && _.last(session.split('--')) || ''
+          }, {
+            'label': 'Дополнительные поля',
+            'transform': (data) => {
+              let desc = data.user_info_description;
+              let info = data.user_info;
+              return (!desc || !info)
+                ? ''
+                : _.reduce(desc, (acc, item, key) => {
+                  if (info[key] && !item.private) {
+                    acc.push(item.label + " : " + info[key]);
+                  }
+                  return acc;
+                }, []).join('  ');
+            }
           }
 
         ],

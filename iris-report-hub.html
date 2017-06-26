@@ -212,7 +212,6 @@
 
       <div id="group-selector">
         <paper-material elevation="1">
-
           <iron-pages attr-for-selected="type" selected="[[selectedTemplate.table_type]]">
             <report-group-maker type="nested" groups="{{groups}}" captions="{{captions}}"></report-group-maker>
             <report-history-filter-maker filter="{{classicFilter}}" type="classic"></report-history-filter-maker>
@@ -278,11 +277,11 @@
 
     </iron-pages>
     <paper-material id="action-buttons" elevation="1">
-
       <paper-button disabled$="[[canBack(selectedPage)]]" on-tap="previousPage">Назад</paper-button>
       <paper-button disabled$="[[canNext(selectedPage,selectedTemplate,selectedOffices.length,startDate,endDate,groups,selectedServices.length)]]" on-tap="nextPage">Далее</paper-button>
     </paper-material>
   </template>
+
   <script>
     (function () {
       'use strict'
@@ -505,14 +504,14 @@
           //@NOTE: build service filter
           if (this.selectedServices.length && this.selectedServices.length != _.size(this.services)) {
             let condition = "service in " + this.selectedServices.join(',');
-            console.log(template.params, condition, this.selectedServices)
+
             _.forEach(template.params, param => (param.filter || (param.filter = [])).push(condition));
           }
 
           if (template.table_type == 'classic' && this.classicFilter) {
-            _.forEach(template.params, param => param.filter = !!this.classicFilter
-              ? [this.classicFilter]
-              : undefined);
+            _.forEach(template.params, param => {
+              (param.filter || (param.filter = [])).push(this.classicFilter);
+            });
           }
 
           this.getTable(template).then((data) => {
@@ -521,8 +520,9 @@
             console.log('template', template);
 
             if (template.transform instanceof Function) {
-              this.set('classicData', template.transform(data));
-              this.tableLoading = false;
+              const transformed = template.transform(data);
+              console.log(transformed);
+              this.set('classicData', transformed);
               return;
             }
 
@@ -544,7 +544,9 @@
             });
           }).catch((e) => {
             console.log('bad news:', e);
-          });
+          }).then(() => {
+            this.tableLoading = false;
+          })
         },
         getTable(template) {
           return this.$.reporter.getTable({table: template})

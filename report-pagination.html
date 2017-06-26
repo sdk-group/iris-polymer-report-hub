@@ -19,11 +19,8 @@
       }
 
     </style>
-    <!-- <template is="dom-repeat" items="[[pageNumbers]]">
-      <paper-button raised on-tap="selectPage">[[item.number]]</paper-button>
-    </template> -->
-    <template is="dom-if" if="[[hasPages([pageNumbers.length)]]">
-      <paper-slider id="ratings" pin snaps max="[[pageNumbers.length]]" min="1" max-markers="100" step="1" value="{{pageIndex}}"></paper-slider>
+    <template is="dom-if" if="[[hasPages]]">
+      <paper-slider id="ratings" pin snaps max="[[maxLength]]" min="1" max-markers="100" step="1" value="{{pageIndex}}"></paper-slider>
     </template>
   </template>
   <script>
@@ -31,7 +28,8 @@
       is: 'report-pagination',
       properties: {
         data: {
-          type: Array
+          type: Array,
+          observer: "_dataChanged"
         },
         page: {
           type: Array,
@@ -63,14 +61,25 @@
       _getPage(page, data) {
         let begin = (page - 1) * this.itemsPerPage;
         let end = begin + this.itemsPerPage;
-        return this.data.slice(begin, end);
+        return this.data.length
+          ? this.data.slice(begin, end)
+          : [];
+      },
+      _dataChanged() {
+        this.set('pageIndex', 1);
+        this.set('maxLength', _.ceil(this.data.length / this.itemsPerPage) || 1);
       },
       _getPageNumbers(page, data, ipp) {
-        if (!data.length)
+        if (!data.length) {
+          this.set('hasPages', false);
           return [];
+        }
+
+        this.set('hasPages', true);
 
         let count = _.ceil(data.length / ipp);
         let range = _.range(1, count + 1);
+
         return _.map(range, number => ({
           number,
           selected: number == page
